@@ -14,8 +14,8 @@ NFLAGS=-arch=sm_32
 
 all: sssp
 
-sssp: sssp.cu graph.cpp timer.cpp
-	$(NV) -o a.exe sssp.cu graph.cpp timer.cpp
+sssp: sssp2.cu graph.cpp timer.cpp
+	$(NV) -o a.exe sssp2.cu graph.cpp timer.cpp
 
 clean:
 	rm *.obj
