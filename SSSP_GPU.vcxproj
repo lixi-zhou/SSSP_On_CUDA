@@ -82,9 +82,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="graph.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.hpp" />
+    <ClInclude Include="timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
