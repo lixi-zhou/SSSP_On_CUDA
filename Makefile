@@ -17,6 +17,5 @@ all: sssp
 sssp: sssp.cu graph.cpp
 	$(NV) -o a.exe sssp.cu graph.cpp
 
-
 clean:
 	rm *.obj
