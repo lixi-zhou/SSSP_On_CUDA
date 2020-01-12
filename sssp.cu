@@ -16,6 +16,7 @@ int* previousNode;
 // int graph[NUMBER][NUMBER];  //  a matrix to represent the graph
 int ** graph;
 bool* finished;
+int* graph_static;
 
 void init(Graph* graphData, int source) {
     numNodes = graphData->numNodes;
@@ -38,6 +39,7 @@ void init(Graph* graphData, int source) {
             previousNode[i] = source;
         }
     }
+
 }
 
 
@@ -105,11 +107,12 @@ void printGraph(){
 
 __global__ void dijkstraOnGPU_kernel1(int numNodes, 
                                 int sourceId,
-                                int** graphData,
+                                int* graphData,
                                 bool* finished,
                                 int* dist,
                                 int* prev,
                                 int* closestNodeId) {
+    // kernel to compute the closest node 
     int threadId = blockDim.x * blockIdx.x + threadIdx.x;
     int nodeId = threadId;
     //int nodeBeginId = partSize * partId;
@@ -117,9 +120,9 @@ __global__ void dijkstraOnGPU_kernel1(int numNodes,
     //if (nodeEndId > numNodes) nodeEndId = numNodes;
 
     //printf("Thread %d: processes the nodes from %d to %d\n", partId, nodeBeginId, nodeEndId);
-    
+    // printf("Thread: %d", threadId);
     if (nodeId < numNodes){
-        printf("This thread id is: %d\n", threadId);
+        // printf("This thread id is: %d\n", threadId);
         printf("dist[%d] is %d, and the closest distance is %d\n\n", nodeId, dist[nodeId], dist[*closestNodeId]);
         if (!finished[nodeId] && dist[nodeId] < dist[*closestNodeId]){
             // printf("Finished?");
@@ -127,40 +130,46 @@ __global__ void dijkstraOnGPU_kernel1(int numNodes,
             printf("updated closetNodeId: %d\n", *closestNodeId);
         }
     }
-    // printf("Graph[0][2]: %d\n", graphData[0][2]);
-    printf("Print graph from GPU. Num nodes: %d \n", numNodes);
+    // printf("Graph[0][2]: %d\n", graphData[2]);
+    /* printf("Print graph from GPU. Num nodes: %d \n", numNodes);
     for(int i = 0; i < numNodes; i++){
         for(int j = 0; j < numNodes; j++){
             printf("[%d][%d]: %d ", i, j, graphData[i][j]);
         }
         printf("\n");
     }
-    printf("\n");
+    printf("\n"); */
 
 
 }
 
 __global__ void dijkstraOnGPU_kernel2(int numNodes, 
                                         int sourceId,
-                                        int** graphData,
+                                        int* graphData,
                                         bool* finished,
                                         int* dist,
                                         int* prev,
-                                        int* closestNodeId) {
+                                        int* closestNodeId,
+                                        int GRAPH_MAX_SIZE) {
 
     // Based on closest node then update its connected node
     int threadId = blockDim.x * blockIdx.x + threadIdx.x;
     int nodeId = threadId;
     if(nodeId > numNodes) return;
-
+    // rowIndex = closestNodeId;
+    // colIndex = nodeId;
+    // Convert to 1-D index
+    int index = *closestNodeId * GRAPH_MAX_SIZE + nodeId;
     // printf("graphData[%d][%d]: is %d \n", *closestNodeId, nodeId, graphData[*closestNodeId][nodeId]);
-    if (!finished[nodeId] && graphData[*closestNodeId][nodeId] < MAX_DIST){
+    if (!finished[nodeId] && graphData[index] < MAX_DIST){
         // Find the shorter path
-        if(dist[*closestNodeId] + graphData[*closestNodeId][nodeId] < dist[nodeId]){
+        if(dist[*closestNodeId] + graphData[index] < dist[nodeId]){
             // Update dist
-            dist[nodeId] = dist[*closestNodeId] + graphData[*closestNodeId][nodeId];
+            dist[nodeId] = dist[*closestNodeId] + graphData[index];
             // Update its previous point
             prev[nodeId] = *closestNodeId;
+            printf("update prev[%d] = %d\n", nodeId, *closestNodeId);
+            printf("update dist[%d] = %d\n", nodeId, dist[*closestNodeId] + graphData[index]);
         }
     }
 }
@@ -192,7 +201,7 @@ int main() {
 
     // finish = clock();
 
-    printShortestDistance(0);
+    // printShortestDistance(0);
 
     // cout << "Execution time of SSSP: " << (finish - start) << " ms" << endl;
     //dijkstraOnCPU<<<1,10>>>();
@@ -214,19 +223,29 @@ int main() {
     // int* closestNodeId = new int(6);
     int closestNodeId = 6;
     // Define GPU vars
-    int** d_graph;
+    int* d_graph;   // 2D array is converted to 1-D, row = i / cols, col = i % cols;
     int* d_dist;
     int* d_prev;
     bool* d_finished;
     int* d_closestNodeId;
 
-    gpuErrorcheck(cudaMalloc((void **)&d_graph, numNodes * numNodes * sizeof(int)));
+
+    /* int width = GRAPH_MAX_SIZE, height = GRAPH_MAX_SIZE;
+    size_t pitch;
+    size_t size = sizeof(int) * width;    */
+    
+
+
+    // gpuErrorcheck(cudaMallocPitch((void **)&d_graph, &pitch, size, height));
+    // gpuErrorcheck(cudaMemset2D(d_graph, pitch, 0, size, height));
+    gpuErrorcheck(cudaMalloc((void **)&d_graph, GRAPH_MAX_SIZE * GRAPH_MAX_SIZE * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_dist, numNodes * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_prev, numNodes * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_finished, numNodes * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_closestNodeId, sizeof(int)));
 
-    gpuErrorcheck(cudaMemcpy(d_graph, graph, numNodes * numNodes * sizeof(int), cudaMemcpyHostToDevice));
+    // gpuErrorcheck(cudaMemcpy2D(d_graph, pitch, graph1.graph, size, size, height, cudaMemcpyHostToDevice));
+    gpuErrorcheck(cudaMemcpy(d_graph, graph[0], GRAPH_MAX_SIZE * GRAPH_MAX_SIZE * sizeof(int), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_dist, dist, numNodes * sizeof(int), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_prev, previousNode, numNodes * sizeof(int), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_finished, finished, numNodes * sizeof(int), cudaMemcpyHostToDevice));
@@ -251,16 +270,17 @@ int main() {
     gpuErrorcheck(cudaPeekAtLastError());
     gpuErrorcheck(cudaDeviceSynchronize());
     
-    // dijkstraOnGPU_kernel2<<<numBlock, numThreadPerBlock>>>(numNodes,
-    //                                                 0,
-    //                                                 d_graph,
-    //                                                 d_finished,
-    //                                                 d_dist,
-    //                                                 d_prev,
-    //                                                 d_closestNodeId);
+    dijkstraOnGPU_kernel2<<<numBlock, numThreadPerBlock>>>(numNodes,
+                                                    0,
+                                                    d_graph,
+                                                    d_finished,
+                                                    d_dist,
+                                                    d_prev,
+                                                    d_closestNodeId,
+                                                    GRAPH_MAX_SIZE);
 
 
-    // cudaDeviceSynchronize();    
+    cudaDeviceSynchronize();    
     // print("%d", d_closestNodeId);
     cudaMemcpy(&closestNodeId, d_closestNodeId, sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(dist, d_dist, numNodes * sizeof(int), cudaMemcpyDeviceToHost);

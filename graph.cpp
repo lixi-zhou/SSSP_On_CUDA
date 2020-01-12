@@ -5,8 +5,15 @@
 
 Graph::Graph(string graphFilePath) {
 	this->graphFilePath = graphFilePath;
+	this->graph[0] = new int[GRAPH_MAX_SIZE * GRAPH_MAX_SIZE];
+	for (int i = 1; i < GRAPH_MAX_SIZE; i++){
+		// Make its memoery contiguous
+		this->graph[i] = graph[i-1] + GRAPH_MAX_SIZE;
+	}
+
+
 	for (int i = 0; i < GRAPH_MAX_SIZE; i++) {
-		this->graph[i] = new int[GRAPH_MAX_SIZE]();
+		// this->graph[i] = new int[GRAPH_MAX_SIZE]();
 		
 		// memset(this->graph[i], 1, sizeof(int) * GRAPH_MAX_SIZE);
 		for(int j = 0; j < GRAPH_MAX_SIZE; j++){

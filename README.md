@@ -2,4 +2,4 @@
 
 
 ### Known issues
-- [ ] error when copying graph data from host to device
+- [x] error when copying graph data from host to device
