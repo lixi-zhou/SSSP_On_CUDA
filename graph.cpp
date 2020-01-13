@@ -70,9 +70,9 @@ void Graph::readGraph() {
 	}
 
 	this->numEdges = edgeCounter;
-	this->numNodes = maxNodeNumber;
+	this->numNodes = maxNodeNumber + 1;
 
-	cout << "Read graph from " << this->graphFilePath << ". This graph contains " << maxNodeNumber \
+	cout << "Read graph from " << this->graphFilePath << ". This graph contains " << this->numNodes \
 		<< " nodes, and " << edgeCounter << " edges" << endl;
 }
 

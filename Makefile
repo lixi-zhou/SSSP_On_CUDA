@@ -12,9 +12,12 @@ NFLAGS=-arch=sm_32
 # 	$(NV) -c sssp.cu graph.obj
 # 	$(NV) sssp.obj graph.obj
 
-all: sssp
+all: sssp2
 
-sssp: sssp2.cu graph.cpp timer.cpp
+sssp1: sssp.cu graph.cpp timer.cpp
+	$(NV) -o a.exe sssp.cu graph.cpp timer.cpp
+
+sssp2: sssp2.cu graph.cpp timer.cpp
 	$(NV) -o a.exe sssp2.cu graph.cpp timer.cpp
 
 clean:

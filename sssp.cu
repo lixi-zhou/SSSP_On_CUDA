@@ -53,13 +53,18 @@ void init(Graph* graphData, int source) {
 }
 
 void printShortestDistance(int source) {
+    int diameter = 0;
     for (int i = 0; i < numNodes; i++) {
         if(dist[i] != MAX_DIST){
-            printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
+            if(dist[i] > diameter){
+                diameter = dist[i];
+            }
+            // printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
         }else{
-            printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
+            // printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
         } 
     }
+    printf("Diameter: %d\n", diameter);
 }
 
 void printGraph(){
@@ -235,6 +240,7 @@ void dijkstraOnGPU(int source){
     int minimumDist = MAX_DIST;
     int numIteration = 0;
 
+
     timer.start();
 
     do{
@@ -305,7 +311,8 @@ void dijkstraOnGPU(int source){
 int main() {
 
     // Graph graph1("simpleGragh.txt");
-    Graph graph1("email-Eu-core-SIMPLE.txt");
+    // Graph graph1("email-Eu-core-SIMPLE.txt");
+    Graph graph1("p2p-Gnutella08.txt");
     // Graph graph1("email-Eu-core.txt");
      //Graph graph("testGraph.txt");
     graph1.readGraph();
@@ -316,11 +323,14 @@ int main() {
     // Run SSSP on CPU
     dijkstraOnCPU(sourceId);
 
+    printShortestDistance(sourceId);
+
+
     init(&graph1, sourceId);   // source 0
 
     // Run SSSP on GPU
     dijkstraOnGPU(sourceId);
-
+    printShortestDistance(sourceId);
 
    
 

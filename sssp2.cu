@@ -53,13 +53,18 @@ void init(Graph* graphData, int source) {
 }
 
 void printShortestDistance(int source) {
+    int diameter = 0;
     for (int i = 0; i < numNodes; i++) {
         if(dist[i] != MAX_DIST){
-            printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
+            if(dist[i] > diameter){
+                diameter = dist[i];
+            }
+            // printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
         }else{
-            printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
+            // printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
         } 
     }
+    printf("Diameter: %d\n", diameter);
 }
 
 void printGraph(){
@@ -80,9 +85,20 @@ void printFinished(){
     printf("\n");
 }
 
+void imcompletedAndConnectedNode(){
+    int count = 0;
+    for(int i = 0; i < numNodes; i++){
+        if((!finished[i] && (dist[i] != MAX_DIST))){
+            count++;
+        }
+    }
+    printf("Imcompleted Nodes Number: %d\n", count);
+}
+
 void dijkstraOnCPU(int source) {
     Timer timer;
     int size = numNodes;
+    int numIteration = 0;
     
     // Find the connected nodes to the source point
     // Set the source point
@@ -95,11 +111,19 @@ void dijkstraOnCPU(int source) {
         // U is the closet point to source, u is not finished yet
         int u = source;
 
+        numIteration++;
+
         for (int j = 0; j < size; j++) {
             if ((j != u) && (!finished[j]) && dist[j] < mindist) {
                 u = j;
                 mindist = dist[j];
             }
+        }
+        // imcompletedAndConnectedNode();
+        // break;
+        if (u == source){
+            // Completed
+            break;
         }
 
         finished[u] = true;
@@ -116,6 +140,7 @@ void dijkstraOnCPU(int source) {
             }
         }
     }
+    printf("Number of Iteration Executed: %d\n", numIteration);
     printf("The execution time of SSSP on CPU: %d ms\n", timer.stop());
     // printShortestDistance(0);
 }
@@ -258,56 +283,69 @@ void dijkstraOnGPU(int source){
     int minimumDist = MAX_DIST;
     int numIteration = 0;
 
-    timer.start();
+    
+    // Each block has 128 threads
+   
+    int numNodesPerPart = 64;
+    int numThreadPerBlock = 1;
+    int numBlock = (numNodes) / (numNodesPerPart) + 1;
 
+
+    // Each thread process 128 nodes;
+    // numBlock = 1;
+    // numThreadPerBlock = (numNodes / 512) + 1;
+    // numThreadPerBlock = 1;
+    
+    timer.start();
     do{
         numIteration++;
         completed = true;
         minimumDist = MAX_DIST;
-        // Each block has 128 threads
-        int numThreadPerBlock = 128;
-        int numBlock = (numNodes / numThreadPerBlock) + 1;
-
-
-        // Each thread process 128 nodes;
-        numBlock = 1;
-        numThreadPerBlock = (numNodes / 128) + 1;
+        
         
         gpuErrorcheck(cudaMemcpy(d_completed, &completed, sizeof(bool), cudaMemcpyHostToDevice));
         gpuErrorcheck(cudaMemcpy(d_minimumDist, &minimumDist, sizeof(int), cudaMemcpyHostToDevice));
 
-        dijkstraOnGPU_kernel1<<<numBlock, numThreadPerBlock >>>(numNodes,
-                                                        source,
-                                                        128,
-                                                        d_graph,
-                                                        d_finished,
-                                                        d_dist,
-                                                        d_prev,
-                                                        d_closestNodeId,
-                                                        d_minimumDist,
-                                                        d_completed);
+        if(numIteration % 2 == 1){
+            dijkstraOnGPU_kernel1<<< numBlock, 1 >>>(numNodes,
+                source,
+                numNodesPerPart,
+                d_graph,
+                d_finished,
+                d_dist,
+                d_prev,
+                d_closestNodeId,
+                d_minimumDist,
+                d_completed);
+            gpuErrorcheck(cudaMemcpy(&completed, d_completed, sizeof(bool), cudaMemcpyDeviceToHost));
+        }else{
+            dijkstraOnGPU_kernel2<<<numBlock, 1>>>(numNodes,
+                source,
+                numNodesPerPart,
+                d_graph,
+                d_finished,
+                d_dist,
+                d_prev,
+                d_closestNodeId,
+                GRAPH_MAX_SIZE);
+            completed = false;
+        }
 
-        gpuErrorcheck(cudaPeekAtLastError());
-        gpuErrorcheck(cudaDeviceSynchronize());
         
-        dijkstraOnGPU_kernel2<<<numBlock, numThreadPerBlock>>>(numNodes,
-                                                        source,
-                                                        128,
-                                                        d_graph,
-                                                        d_finished,
-                                                        d_dist,
-                                                        d_prev,
-                                                        d_closestNodeId,
-                                                        GRAPH_MAX_SIZE);
+        // gpuErrorcheck(cudaPeekAtLastError());
+        // gpuErrorcheck(cudaDeviceSynchronize());
+        
+        
 
 
         gpuErrorcheck(cudaDeviceSynchronize());  
-        gpuErrorcheck(cudaMemcpy(&completed, d_completed, sizeof(bool), cudaMemcpyDeviceToHost));
-        gpuErrorcheck(cudaMemcpy(finished, d_finished, numNodes * sizeof(bool), cudaMemcpyDeviceToHost));
+        
+        
         // printFinished();
         // printf("finished: %d\n", completed);
     }while(!completed);
 
+    // gpuErrorcheck(cudaMemcpy(finished, d_finished, numNodes * sizeof(bool), cudaMemcpyDeviceToHost));
     printf("Number of Iteration Executed: %d\n", numIteration);
     printf("The execution time of SSSP on GPU: %d ms\n", timer.stop());
     // print("%d", d_closestNodeId);
@@ -329,27 +367,32 @@ void dijkstraOnGPU(int source){
     cudaFree(d_minimumDist);
     cudaFree(d_completed);
 
-    printShortestDistance(0);
+    // printShortestDistance(0);
 }
 
 int main() {
 
-    Graph graph1("simpleGragh.txt");
+    // Graph graph1("simpleGragh.txt");
     // Graph graph1("email-Eu-core-SIMPLE.txt");
     // Graph graph1("email-Eu-core.txt");
+    Graph graph1("Wiki-Vote.txt");
+    // Graph graph1("simpleGragh2.txt");
+    // Graph graph1("CA-GrQc.txt");
      //Graph graph("testGraph.txt");
     graph1.readGraph();
-    int sourceId = 0;
+    int sourceId = 3;
 
     init(&graph1, sourceId);   // source 0
         
     // Run SSSP on CPU
     dijkstraOnCPU(sourceId);
+    printShortestDistance(sourceId);
 
     init(&graph1, sourceId);   // source 0
 
     // Run SSSP on GPU
     dijkstraOnGPU(sourceId);
+    printShortestDistance(sourceId);
 
 
    
