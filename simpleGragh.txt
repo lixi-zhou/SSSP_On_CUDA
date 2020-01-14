@@ -1,5 +1,4 @@
 # A simple graph with 7 nodes and 9 edges
-
 0 1 2
 1 5 3
 1 2 2

@@ -59,9 +59,9 @@ void printShortestDistance(int source) {
             if(dist[i] > diameter){
                 diameter = dist[i];
             }
-            // printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
+            printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
         }else{
-            // printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
+            printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
         } 
     }
     printf("Diameter: %d\n", diameter);
@@ -347,17 +347,18 @@ void dijkstraOnGPU(int source){
     // printShortestDistance(0);
 }
 
-int main() {
 
-    // Graph graph1("simpleGragh.txt");
+/* int main() {
+
+    Graph graph1("simpleGragh.txt");
     // Graph graph1("email-Eu-core-SIMPLE.txt");
-    Graph graph1("email-Eu-core.txt");
+    // Graph graph1("email-Eu-core.txt");
     // Graph graph1("Wiki-Vote.txt");
     // Graph graph1("simpleGragh2.txt");
     // Graph graph1("CA-GrQc.txt");
      //Graph graph("testGraph.txt");
     graph1.readGraph();
-    int sourceId = 3;
+    int sourceId = 0;
 
     init(&graph1, sourceId);   // source 0
         
@@ -368,11 +369,8 @@ int main() {
     init(&graph1, sourceId);   // source 0
 
     // Run SSSP on GPU
-    dijkstraOnGPU(sourceId);
-    printShortestDistance(sourceId);
-
-
-   
+    // dijkstraOnGPU(sourceId);
+    // printShortestDistance(sourceId);
 
     return 0;
-}
+} */

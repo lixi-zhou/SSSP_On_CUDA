@@ -27,7 +27,7 @@ sssp4: sssp4.cu newGraph.cpp timer.cpp
 	$(NV) -o a.exe sssp4.cu newGraph.cpp timer.cpp
 
 sssp6: sssp6.cu newGraph.cpp timer.cpp
-	$(NV) -o a.exe sssp6.cu newGraph.cpp timer.cpp
+	$(NV) -o a.exe sssp6.cu graph.cpp timer.cpp
 
 clean:
 	rm *.obj
