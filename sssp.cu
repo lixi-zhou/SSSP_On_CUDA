@@ -308,31 +308,31 @@ void dijkstraOnGPU(int source){
     // printShortestDistance(0);
 }
 
-int main() {
-
-    // Graph graph1("simpleGragh.txt");
-    // Graph graph1("email-Eu-core-SIMPLE.txt");
-    Graph graph1("p2p-Gnutella08.txt");
-    // Graph graph1("email-Eu-core.txt");
-     //Graph graph("testGraph.txt");
-    graph1.readGraph();
-    int sourceId = 0;
-
-    init(&graph1, sourceId);   // source 0
-        
-    // Run SSSP on CPU
-    dijkstraOnCPU(sourceId);
-
-    printShortestDistance(sourceId);
-
-
-    init(&graph1, sourceId);   // source 0
-
-    // Run SSSP on GPU
-    dijkstraOnGPU(sourceId);
-    printShortestDistance(sourceId);
-
-   
-
-    return 0;
-}
+//int main() {
+//
+//    // Graph graph1("simpleGragh.txt");
+//    // Graph graph1("email-Eu-core-SIMPLE.txt");
+//    Graph graph1("p2p-Gnutella08.txt");
+//    // Graph graph1("email-Eu-core.txt");
+//     //Graph graph("testGraph.txt");
+//    graph1.readGraph();
+//    int sourceId = 0;
+//
+//    init(&graph1, sourceId);   // source 0
+//        
+//    // Run SSSP on CPU
+//    dijkstraOnCPU(sourceId);
+//
+//    printShortestDistance(sourceId);
+//
+//
+//    init(&graph1, sourceId);   // source 0
+//
+//    // Run SSSP on GPU
+//    dijkstraOnGPU(sourceId);
+//    printShortestDistance(sourceId);
+//
+//   
+//
+//    return 0;
+//}

@@ -8,7 +8,7 @@
 
 
 
-const int GRAPH_MAX_SIZE = 9000;
+const int GRAPH_MAX_SIZE = 12000;
 const int MAX_DIST = 65535;
 
 using namespace std;
@@ -21,7 +21,6 @@ public:
     int numNodes;
     int numEdges;
     int** graph = new int* [GRAPH_MAX_SIZE];
-
 
     Graph(string graphFilePath);
     void readGraph();
