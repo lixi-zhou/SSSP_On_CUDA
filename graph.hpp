@@ -8,7 +8,7 @@
 
 
 
-const int GRAPH_MAX_SIZE = 120000;
+const int GRAPH_MAX_SIZE = 12000;
 const int MAX_DIST = 65535;
 
 using namespace std;

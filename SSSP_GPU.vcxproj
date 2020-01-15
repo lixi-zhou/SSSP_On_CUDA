@@ -79,7 +79,7 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="sssp3.cu" />
-    <CudaCompile Include="sssp6.cu" />
+    <CudaCompile Include="sssp7.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="graph.cpp" />
