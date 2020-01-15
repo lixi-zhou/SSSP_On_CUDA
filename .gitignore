@@ -4,6 +4,7 @@
 *.ptx
 *.cubin
 *.fatbin
+a.*
+.vscode/
 .vs/
 x64/
-a.*

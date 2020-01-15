@@ -77,19 +77,15 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="sssp3.cu" />
     <CudaCompile Include="sssp7.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="graph.cpp" />
-    <ClCompile Include="newGraph.cpp" />
     <ClCompile Include="timer.cpp" />
+    <ClCompile Include="utilities\graph.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graph.hpp" />
-    <ClInclude Include="newGraph.hpp" />
     <ClInclude Include="timer.hpp" />
+    <ClInclude Include="utilities\graph.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
