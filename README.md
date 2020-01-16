@@ -1,5 +1,17 @@
 # SSSP_On_CUDA
 
+---
+
+Implement Dijkstra's SSSP on both CPU and GPU (CUDA)
+
+---
+
+## Instruction
+
+Run `make` in the root folder.
+
+
+---
 
 ### Known issues
 - [x] error when copying graph data from host to device
