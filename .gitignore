@@ -5,6 +5,7 @@
 *.cubin
 *.fatbin
 a.*
+dija.*
 .vscode/
 .vs/
 x64/
