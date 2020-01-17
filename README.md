@@ -22,7 +22,12 @@ Implement Dijkstra's SSSP on both CPU and GPU (CUDA)
 
 ## Instruction
 
-Run `make [OPTION]` in the root folder to generate the executable file. There are mainly **3** different implementation of the SSSP.
+Run `make [OPTION]` in the root folder to generate the executable file. There are mainly **4** different implementation of the SSSP.
+
+There are some limitation now:
+
+1. Argument parsing is not support yet. The path of graph data has to be hard code in the source file.
+2. For now, it only supports the graph, whose number of node is no bigger than 12,000.
 
 ## Description
 
@@ -31,21 +36,33 @@ Run `make [OPTION]` in the root folder to generate the executable file. There ar
 - Set *finished*: the nodes have been processed.
 - Set *unprocessed*: the nodes have not been processed. `All nodes are placed in unprocessed set after initialization.`
 
-1. Find the closest node to the source node.
-2. Update the connected nodes' distance of the closest node.
-3. Loop *Step 1* and *Step 2* until all nodes are in **finished** set.
+1. Use for loop to find the closest node to the source node from **unprocessed** set.
+2. Use for loop to update the connected nodes' distance of the closest node.
+3. Repeat *Step 1* and *Step 2* until all nodes are in **finished** set.
 
 ### Implementation of dijkstra on GPU (sssp2)
 
+Basic implementation of dijkstra algorithm on GPU.
+
+1. Launch multiple thread to find the closest node parallel from **unprocessed** set.
+2. Launch multiple thread to update the connected nodes' distance of the closest node.
+3. Repeat  *Step 1* and *Step 2* untill all nodes are in **finished** set. 
+
 ### Implementation of dijkstra on GPU (sssp6)
+
+1. Launch multiple thread the find the minimum distance of **unprocessed** nodes.
+2. Launch multiple thread to update the connected node's distance of the nodes, whose distance to source node equals to the minimum distance of *Step 1*.
+3. Repeat  *Step 1* and *Step 2* untill all nodes are in **finished** set. 
 
 ### Implementation of dijkstra on GPU (sssp7)
 
+1. Use CPU to find the minimum distance of **unprocessed** nodes.
+2. Launch multiple thread to update the connected node's distance of the nodes, whose distance to source node equals to the minimum distance of *Step 1*.
+3. Repeat  *Step 1* and *Step 2* untill all nodes are in **finished** set. 
+
 ### Implementation of dijkstra on GPU (sssp8)
 
-
-
-- SSSP2: Basic 
+Allocate the memory by using the unified memory. The other part is the same as the sssp6.
 
 
 ---
