@@ -24,6 +24,8 @@ Implement Dijkstra's SSSP on both CPU and GPU (CUDA)
 
 Run `make [OPTION]` in the root folder to generate the executable file. There are mainly **4** different implementation of the SSSP.
 
+*The option can be sssp2, sssp6, sssp7, sssp8*
+
 There are some limitation now:
 
 1. Argument parsing is not support yet. The path of graph data has to be hard code in the source file.
