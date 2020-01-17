@@ -6,6 +6,6 @@
 *.fatbin
 a.*
 dija.*
-.vscode/
+# .vscode/
 .vs/
 x64/
