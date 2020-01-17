@@ -5,7 +5,7 @@ NFLAGS=-arch=sm_32
 
 UTILITIES=utilities
 
-all: sssp7
+all: sssp8
 
 sssp1: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	$(NV) -o a.exe sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
@@ -24,6 +24,12 @@ sssp6: sssp6.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 sssp7: sssp7.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	$(NV) -o a.exe sssp7.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+
+sssp8: sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o a.exe sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+
+sssp9: sssp9.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o a.exe sssp9.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	
 clean:
 	rm *.obj

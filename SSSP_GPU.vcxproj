@@ -77,15 +77,16 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="sssp7.cu" />
+    <CudaCompile Include="sssp8.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="timer.cpp" />
     <ClCompile Include="utilities\graph.cpp" />
+    <ClCompile Include="utilities\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="timer.hpp" />
+    <ClInclude Include="utilities\gpu_error_check.cuh" />
     <ClInclude Include="utilities\graph.hpp" />
+    <ClInclude Include="utilities\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
