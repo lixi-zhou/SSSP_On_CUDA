@@ -7,9 +7,7 @@
 
 /*
 
-Version 2. 128 Nodes Per Thread
-
-
+Optimization 1
 
 */
 
@@ -312,7 +310,7 @@ void dijkstraOnGPU(int source){
 
 int main() {
 
-    // Graph graph1("datasets/simpleGragh2.txt");
+    // Graph graph1("datasets/simpleGragh.txt");
     // Graph graph1("datasets/email-Eu-core-SIMPLE.txt");
     // Graph graph1("datasets/email-Eu-core.txt");
     Graph graph1("datasets/Wiki-Vote.txt");

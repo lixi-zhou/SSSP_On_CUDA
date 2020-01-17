@@ -7,9 +7,7 @@
 
 /*
 
-Version 2. 128 Nodes Per Thread
-
-
+Applying Unified Memory
 
 */
 
@@ -343,15 +341,15 @@ void dijkstraOnGPU(int source){
 
 int main() {
 
-    // Graph graph1("datasets/simpleGragh2.txt");
+    Graph graph1("datasets/simpleGragh.txt");
     // Graph graph1("datasets/email-Eu-core-SIMPLE.txt");
     // Graph graph1("datasets/email-Eu-core.txt");
-    Graph graph1("datasets/Wiki-Vote.txt");
+    // Graph graph1("datasets/Wiki-Vote.txt");
     // Graph graph1("datasets/simpleGragh2.txt");
     // Graph graph1("datasets/CA-GrQc.txt");
      //Graph graph("datasets/testGraph.txt");
     graph1.readGraph();
-    int sourceId = 30;
+    int sourceId = 0;
 
     init(&graph1, sourceId);   // source 0
         

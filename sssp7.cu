@@ -6,7 +6,8 @@
 #include "./utilities/gpu_error_check.cuh"
 
 /*
-Version 7. 128 Nodes Per Thread
+
+Optimization 2
 
 */
 
@@ -237,7 +238,7 @@ void dijkstraOnGPU(int source){
     int minimumDist = MAX_DIST;
     int numIteration = 0;
    
-    int numNodesPerPart = 2;
+    int numNodesPerPart = 1;
     int numThreadPerBlock = 64;
     int numBlock = (numNodes) / (numNodesPerPart * numThreadPerBlock) + 1;
     
@@ -292,12 +293,11 @@ void dijkstraOnGPU(int source){
 
 int main() {
 
-    // Graph graph1("datasets/simpleGragh2.txt");
+    // Graph graph1("datasets/simpleGragh.txt");
     // Graph graph1("datasets/email-Eu-core-SIMPLE.txt");
     // Graph graph1("datasets/email-Eu-core.txt");
     Graph graph1("datasets/Wiki-Vote.txt");
     // Graph graph1("datasets/simpleGragh2.txt");
-    // Graph graph1("datasets/CA-GrQc.txt");
      //Graph graph("datasets/testGraph.txt");
     graph1.readGraph();
     int sourceId = 30;

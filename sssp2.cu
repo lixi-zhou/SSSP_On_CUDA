@@ -7,21 +7,15 @@
 
 /*
 
-Version 2. 128 Nodes Per Thread
-
-
+Basic implementation
 
 */
 
-// const int MAX_DIST = 65535; //  initial value of distance
 int numNodes;
 int numEdges;
 
 int* dist;
 int* previousNode;
-// int dist[NUMBER];   //  array to store the distance from source to each nodes
-// int previousNode[NUMBER];   //  
-// int graph[NUMBER][NUMBER];  //  a matrix to represent the graph
 int ** graph;
 bool* finished;
 int* graph_static;
@@ -59,9 +53,9 @@ void printShortestDistance(int source) {
             if(dist[i] > diameter){
                 diameter = dist[i];
             }
-            printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
+            // printf("Shortest distance from node: %d to source: %d: is: %d\n", i, source, dist[i]);
         }else{
-            printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
+            // printf("Shortest distance from node: %d to source: %d: is: INF\n", i, source);
         } 
     }
     printf("Diameter: %d\n", diameter);
@@ -119,8 +113,6 @@ void dijkstraOnCPU(int source) {
                 mindist = dist[j];
             }
         }
-        // imcompletedAndConnectedNode();
-        // break;
         if (u == source){
             // Completed
             break;
@@ -169,17 +161,11 @@ __global__ void dijkstraOnGPU_kernel1(int numNodes,
 
 
     for(int nodeId = startNodeId; nodeId < endNodeId; nodeId++){
-        // if (nodeId < numNodes){
-            // printf("This thread id is: %d\n", threadId);
-            // printf("dist[%d] is %d, and the closest distance is %d\n\n", nodeId, dist[nodeId], dist[*closestNodeId]);
-            if (!finished[nodeId] && dist[nodeId] < *minimumDist){
-                // printf("Finished?");
-                *closestNodeId = nodeId;
-                *minimumDist = dist[nodeId];
-                // printf("updated closetNodeId: %d\n", *closestNodeId);
-                *completed = false;
-            }
-        // }      
+        if (!finished[nodeId] && dist[nodeId] < *minimumDist){
+            *closestNodeId = nodeId;
+            *minimumDist = dist[nodeId];
+            *completed = false;
+        }
     }
 
 }
@@ -206,8 +192,6 @@ __global__ void dijkstraOnGPU_kernel2(int numNodes,
     if(startNodeId > numNodes) return;
 
     for(int nodeId = startNodeId; nodeId < endNodeId; nodeId++){
-        // rowIndex = closestNodeId;
-        // colIndex = nodeId;
         // Convert to 1-D index
         int index = *closestNodeId * GRAPH_MAX_SIZE + nodeId;
         finished[*closestNodeId] = true;
@@ -219,8 +203,6 @@ __global__ void dijkstraOnGPU_kernel2(int numNodes,
                 dist[nodeId] = dist[*closestNodeId] + graphData[index];
                 // Update its previous point
                 prev[nodeId] = *closestNodeId;
-                // printf("update prev[%d] = %d\n", nodeId, *closestNodeId);
-                // printf("update dist[%d] = %d\n", nodeId, dist[*closestNodeId] + graphData[index]);
             }
         }
     }
@@ -230,7 +212,6 @@ void dijkstraOnGPU(int source){
     Timer timer;
     cudaFree(0);
     // Define CPU vars
-    // int* closestNodeId = new int(6);
     int closestNodeId = 6;
     // Define GPU vars
     int* d_graph;   // 2D array is converted to 1-D, row = i / cols, col = i % cols;
@@ -242,12 +223,7 @@ void dijkstraOnGPU(int source){
     bool* d_completed;
 
 
-    /* int width = GRAPH_MAX_SIZE, height = GRAPH_MAX_SIZE;
-    size_t pitch;
-    size_t size = sizeof(int) * width;    */
-
-    // gpuErrorcheck(cudaMallocPitch((void **)&d_graph, &pitch, size, height));
-    // gpuErrorcheck(cudaMemset2D(d_graph, pitch, 0, size, height));
+    
     gpuErrorcheck(cudaMalloc((void **)&d_graph, GRAPH_MAX_SIZE * GRAPH_MAX_SIZE * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_dist, numNodes * sizeof(int)));
     gpuErrorcheck(cudaMalloc(&d_prev, numNodes * sizeof(int)));
@@ -256,7 +232,6 @@ void dijkstraOnGPU(int source){
     gpuErrorcheck(cudaMalloc(&d_completed, sizeof(bool)));
     gpuErrorcheck(cudaMalloc(&d_minimumDist, sizeof(int)));
 
-    // gpuErrorcheck(cudaMemcpy2D(d_graph, pitch, graph1.graph, size, size, height, cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_graph, graph[0], GRAPH_MAX_SIZE * GRAPH_MAX_SIZE * sizeof(int), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_dist, dist, numNodes * sizeof(int), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_prev, previousNode, numNodes * sizeof(int), cudaMemcpyHostToDevice));
@@ -309,32 +284,14 @@ void dijkstraOnGPU(int source){
         }
 
         
-        // gpuErrorcheck(cudaPeekAtLastError());
-        // gpuErrorcheck(cudaDeviceSynchronize());
-        
-        
-
-
+        gpuErrorcheck(cudaPeekAtLastError());
         gpuErrorcheck(cudaDeviceSynchronize());  
-        
-        
-        // printFinished();
-        // printf("finished: %d\n", completed);
     }while(!completed);
 
-    // gpuErrorcheck(cudaMemcpy(finished, d_finished, numNodes * sizeof(bool), cudaMemcpyDeviceToHost));
     printf("Number of Iteration Executed: %d\n", numIteration);
     printf("The execution time of SSSP on GPU: %d ms\n", timer.stop());
-    // print("%d", d_closestNodeId);
     cudaMemcpy(&closestNodeId, d_closestNodeId, sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(dist, d_dist, numNodes * sizeof(int), cudaMemcpyDeviceToHost);
-    // printf("%d", (int)(*closestNodeId));
-    // printf("%d", closestNodeId);
-
-    // printGraph();
-
-    
-    // graph.printGraph();
 
     cudaFree(d_graph);
     cudaFree(d_dist);
@@ -343,20 +300,18 @@ void dijkstraOnGPU(int source){
     cudaFree(d_closestNodeId);
     cudaFree(d_minimumDist);
     cudaFree(d_completed);
-
-    // printShortestDistance(0);
 }
 
 
-/* int main() {
+int main() {
 
-    Graph graph1("simpleGragh.txt");
-    // Graph graph1("email-Eu-core-SIMPLE.txt");
-    // Graph graph1("email-Eu-core.txt");
-    // Graph graph1("Wiki-Vote.txt");
-    // Graph graph1("simpleGragh2.txt");
-    // Graph graph1("CA-GrQc.txt");
-     //Graph graph("testGraph.txt");
+    // Graph graph1("datasets/simpleGragh1.txt");
+    // Graph graph1("datasets/email-Eu-core-SIMPLE.txt");
+    Graph graph1("datasets/email-Eu-core.txt");
+    // Graph graph1("datasets/Wiki-Vote.txt");
+    // Graph graph1("datasets/simpleGragh2.txt");
+    // Graph graph1("datasets/CA-GrQc.txt");
+     //Graph graph("datasets/testGraph.txt");
     graph1.readGraph();
     int sourceId = 0;
 
@@ -369,8 +324,8 @@ void dijkstraOnGPU(int source){
     init(&graph1, sourceId);   // source 0
 
     // Run SSSP on GPU
-    // dijkstraOnGPU(sourceId);
-    // printShortestDistance(sourceId);
+    dijkstraOnGPU(sourceId);
+    printShortestDistance(sourceId);
 
     return 0;
-} */
+}

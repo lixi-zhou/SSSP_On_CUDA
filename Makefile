@@ -7,11 +7,11 @@ UTILITIES=utilities
 
 all: sssp7
 
-sssp1: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o a.exe sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+# sssp1: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+# 	$(NV) -o a.exe sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 sssp2: sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o a.exe $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o dija sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 # sssp3: sssp3.cu newGraph.cpp timer.cpp
 # 	$(NV) -o a.exe sssp3.cu newGraph.cpp timer.cpp
