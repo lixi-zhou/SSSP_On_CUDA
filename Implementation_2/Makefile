@@ -1,0 +1,17 @@
+CC=g++
+NV=nvcc
+CFLAGS=-std=c++11 -O3
+NFLAGS=-arch=sm_32
+
+UTILITIES=utilities
+
+all: sssp
+
+sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+
+# sssp8: sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+# 	$(NV) -o dija sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	
+clean:
+	rm *.obj

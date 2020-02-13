@@ -1,0 +1,6 @@
+# A simple graph with 5 nodes and 4 edges
+
+0 1
+1 2
+2 4
+0 3
