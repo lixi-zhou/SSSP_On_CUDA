@@ -9,7 +9,8 @@ class Timer{
 
     public:
         void start();
-        int stop();
+        void stop();
+        int elapsedTime();
 
 };
 #endif

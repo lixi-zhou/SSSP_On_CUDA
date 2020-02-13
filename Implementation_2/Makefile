@@ -8,7 +8,7 @@ UTILITIES=utilities
 all: sssp
 
 sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp
 
 # sssp8: sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 # 	$(NV) -o dija sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp

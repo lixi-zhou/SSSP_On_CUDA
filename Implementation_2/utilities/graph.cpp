@@ -74,11 +74,12 @@ void Graph::readGraph() {
 
 	}
 
-	this->numEdges = edgeCounter;
+	
 	if (this->hasZeroId){
-		this->numNodes++;
+		maxNodeNumber++;
 	}
 	this->numNodes = maxNodeNumber;
+	this->numEdges = edgeCounter;
 
 	std::cout << "Read graph from " << this->graphFilePath << ". This graph contains " << this->numNodes \
 		<< " nodes, and " << edgeCounter << " edges" << endl;

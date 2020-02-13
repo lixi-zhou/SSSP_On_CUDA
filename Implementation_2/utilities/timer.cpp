@@ -5,7 +5,10 @@ void Timer::start(){
     this->startTime = clock();
 }
 
-int Timer::stop(){
+void Timer::stop(){
     this->stopTime = clock();
-    return (stopTime - startTime);
+}
+
+int Timer::elapsedTime(){
+    return (this->stopTime - this->startTime);
 }

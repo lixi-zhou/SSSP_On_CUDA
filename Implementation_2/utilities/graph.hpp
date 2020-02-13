@@ -6,15 +6,14 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include "global.hpp"
 
 
 
 // const int GRAPH_MAX_SIZE = 12000;
 // const int MAX_DIST = 65535;
-
+// typedef unsigned int uint;
 using namespace std;
-typedef unsigned int uint;
-
 
 struct Edge{
     uint source;
