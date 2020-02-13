@@ -37,6 +37,7 @@ void Graph::readGraph() {
 			continue;
 		}
 
+
 		stringstream ss(line);
 		edgeCounter++;
 		// read start and end node
