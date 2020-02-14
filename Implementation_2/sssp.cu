@@ -144,18 +144,6 @@ void dijkstraCPU1(Graph* graph, int source){
         finished = true;
         numIteration++;
 
-        
-
-        // for (int i = 0; i < numNodes; i++){
-        //     if (i != source && (!processed[i]) && dist[i] < minDist){
-        //         // Find the minimum distance in un-processed sets
-        //         minDist = dist[i];
-        //         finished = false;
-        //     }    
-        // }
-
-        // vector<uint> sets;
-
         for (int i = 0; i < numEdges; i++){
             Edge edge = graph->edges.at(i);
             // Update its neighbor
@@ -163,20 +151,6 @@ void dijkstraCPU1(Graph* graph, int source){
             uint end = edge.end;
             uint weight = edge.weight;
 
-            // if ((!processed[end]) && dist[end] == minDist){
-            //     // To handle the node which does not have other neighbors
-            //     sets.push_back(end);
-            // }
-
-            // if ((!processed[source]) && (dist[source] == minDist)) {
-            //     sets.push_back(source);
-            //     if (dist[source] + weight < dist[end]){
-            //         // Update dist
-            //         dist[end] = dist[source] + weight;
-            //         preNode[end] = source;
-            //         processed[end] = false;
-            //     }   
-            // }
             if (dist[source] + weight < dist[end]) {
                 dist[end] = dist[source] + weight;
                 preNode[end] = source;
@@ -184,13 +158,12 @@ void dijkstraCPU1(Graph* graph, int source){
             }
         }
         
-        // Mark the processed node
-        // for (int i = 0; i < sets.size(); i++){
-        //     processed[sets.at(i)] = true;
-        // }
     }
     timer.stop();
     
+
+    // printDist(dist, numNodes);
+    // printPreNode(dist, numNodes);
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
     printf("The execution time of SSSP on CPU: %d ms\n", timer.elapsedTime());
@@ -203,5 +176,5 @@ int main(int argc, char **argv){
 
     graph.readGraph();
 
-    dijkstraCPU(&graph, graph.defaultSource);
+    dijkstraCPU1(&graph, graph.defaultSource);
 }
