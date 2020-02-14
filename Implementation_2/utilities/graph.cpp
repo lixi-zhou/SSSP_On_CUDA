@@ -31,6 +31,7 @@ void Graph::readGraph() {
 	string line;
 	uint edgeCounter = 0;
 	uint maxNodeNumber = 0;
+	uint minNodeNumber = MAX_DIST;
 
 	Edge newEdge;
 
@@ -69,6 +70,13 @@ void Graph::readGraph() {
 		if (maxNodeNumber < newEdge.end) {
 			maxNodeNumber = newEdge.end;
 		}
+		if (minNodeNumber > newEdge.source) {
+			minNodeNumber = newEdge.source;
+		}
+		if (minNodeNumber > newEdge.end) {
+			minNodeNumber = newEdge.source;
+		}
+		
 
 		this->edges.push_back(newEdge);
 
@@ -80,6 +88,7 @@ void Graph::readGraph() {
 	}
 	this->numNodes = maxNodeNumber;
 	this->numEdges = edgeCounter;
+	this->defaultSource = minNodeNumber;
 
 	std::cout << "Read graph from " << this->graphFilePath << ". This graph contains " << this->numNodes \
 		<< " nodes, and " << edgeCounter << " edges" << endl;
