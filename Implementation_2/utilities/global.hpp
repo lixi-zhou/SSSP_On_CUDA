@@ -19,4 +19,6 @@ void printProcessed(bool* processed, uint size);
 
 void printPreNode(uint* preNode, uint size);
 
+void compareResult(uint* dist1, uint* dist2, uint numNodes);
+
 #endif
