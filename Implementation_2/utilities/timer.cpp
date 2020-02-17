@@ -2,13 +2,15 @@
 
 
 void Timer::start(){
-    this->startTime = clock();
+    this->startTime = chrono::steady_clock::now();
 }
 
 void Timer::stop(){
-    this->stopTime = clock();
+    this->stopTime = chrono::steady_clock::now();
 }
 
-int Timer::elapsedTime(){
-    return (this->stopTime - this->startTime);
+double Timer::elapsedTime(){
+    double elapsedTime = (double)(chrono::duration_cast<chrono::microseconds>(this->stopTime - this->startTime).count()) / 1000;
+
+    return elapsedTime;
 }

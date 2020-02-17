@@ -52,96 +52,6 @@ uint* sssp_CPU(Graph* graph, int source){
 
     timer.start();
     while (!finished) {
-        uint minDist = MAX_DIST;
-        finished = true;
-        numIteration++;
-
-        
-
-        for (int i = 0; i < numNodes; i++){
-            if (i != source && (!processed[i]) && dist[i] < minDist){
-                // Find the minimum distance in un-processed sets
-                minDist = dist[i];
-                finished = false;
-            }    
-        }
-
-        vector<uint> sets;
-
-        for (int i = 0; i < numEdges; i++){
-            Edge edge = graph->edges.at(i);
-            // Update its neighbor
-            uint source = edge.source;
-            uint end = edge.end;
-            uint weight = edge.weight;
-
-            if ((!processed[end]) && dist[end] == minDist){
-                // To handle the node which does not have other neighbors
-                sets.push_back(end);
-            }
-
-            if ((!processed[source]) && (dist[source] == minDist)) {
-                sets.push_back(source);
-                if (dist[source] + weight < dist[end]){
-                    // Update dist
-                    dist[end] = dist[source] + weight;
-                    preNode[end] = source;
-                    processed[end] = false;
-                }   
-            }
-        }
-        
-        // Mark the processed node
-        for (int i = 0; i < sets.size(); i++){
-            processed[sets.at(i)] = true;
-        }
-    }
-    timer.stop();
-    
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on CPU: %d ms\n", timer.elapsedTime());
-
-    return dist;
-}
-
-void dijkstraCPU1(Graph* graph, int source){
-    int numNodes = graph->numNodes;
-    int numEdges = graph->numEdges;
-    uint *dist = new uint[numNodes];
-    uint *preNode = new uint[numNodes];
-    bool *processed = new bool[numNodes];
-
-    for (int i = 0; i < numNodes; i++) {
-        dist[i] = MAX_DIST;
-        preNode[i] = uint(-1);
-        processed[i] = false;
-    }
-
-
-    for (int i = 0; i < numEdges; i++) {
-        Edge edge = graph->edges.at(i);
-        if (edge.source == source){
-            if (edge.weight < dist[edge.end]){
-                dist[edge.end] = edge.weight;
-                preNode[edge.end] = source;
-            }
-        } else {
-            // Case: edge.source != source
-            continue;
-        }
-    }
-
-    Timer timer;
-    bool finished = false;
-    uint numIteration = 0;
-
-    dist[source] = 0;
-    preNode[source] = 0;
-    processed[source] = true;
-
-    timer.start();
-    while (!finished) {
         // uint minDist = MAX_DIST;
         finished = true;
         numIteration++;
@@ -164,11 +74,11 @@ void dijkstraCPU1(Graph* graph, int source){
     timer.stop();
     
 
-    // printDist(dist, numNodes);
-    // printPreNode(dist, numNodes);
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on CPU: %d ms\n", timer.elapsedTime());
+    printf("The execution time of SSSP on CPU: %f ms\n", timer.elapsedTime());
+
+    return dist;
 }
 
 __global__ void sssp_GPU_Kernel(int numEdges,
@@ -180,21 +90,29 @@ __global__ void sssp_GPU_Kernel(int numEdges,
                                 uint *edgesWeight,
                                 bool *finished) {
     int threadId = blockDim.x * blockIdx.x + threadIdx.x;
+    int startId = threadId * numEdgesPerThread;
     
-    if (threadId >= numEdges) {
+    if (startId >= numEdges) {
         return;
     }
     
-    int nodeId = threadId;
-    uint source = edgesSource[nodeId];
-    uint end = edgesEnd[nodeId];
-    uint weight = edgesWeight[nodeId];
-    
-    if (dist[source] + weight < dist[end]) {
-        dist[end] = dist[source] + weight;
-        preNode[end] = source;
-        *finished = false;
+    int endId = (threadId + 1) * numEdgesPerThread;
+    if (endId >= numEdges) {
+        endId = numEdges;
     }
+
+    for (int nodeId = startId; nodeId < endId; nodeId++) {
+        uint source = edgesSource[nodeId];
+        uint end = edgesEnd[nodeId];
+        uint weight = edgesWeight[nodeId];
+        
+        if (dist[source] + weight < dist[end]) {
+            dist[end] = dist[source] + weight;
+            preNode[end] = source;
+            *finished = false;
+        }
+    }
+    
 }
 
 uint* sssp_GPU(Graph *graph, int source) {
@@ -259,9 +177,9 @@ uint* sssp_GPU(Graph *graph, int source) {
     
     Timer timer;
     int numIteration = 0;
-    int numEdgesPerThread = 2;
+    int numEdgesPerThread = 8;
     int numThreadsPerBlock = 512;
-    int numBlock = (numEdges) / (numThreadsPerBlock) + 1;
+    int numBlock = (numEdges) / (numThreadsPerBlock * numEdgesPerThread) + 1;
     bool finished = true;
 
     timer.start();
@@ -287,10 +205,18 @@ uint* sssp_GPU(Graph *graph, int source) {
     } while(!finished);
     timer.stop();
 
+
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on GPU: %d ms\n", timer.elapsedTime());
+    printf("The execution time of SSSP on GPU: %f ms\n", timer.elapsedTime());
+    // cout << "Elapsed time in milliseconds : " 
+	// 	<< chrono::duration_cast<chrono::milliseconds>(end - start).count()
+	// 	<< " ms" << endl;
 
+    // cout << "Elapsed time in microseconds : " 
+	// 	<< chrono::duration_cast<chrono::microseconds>(end - start).count()
+    //     << " µs" << endl;
+        
     gpuErrorcheck(cudaMemcpy(dist, d_dist, numNodes * sizeof(uint), cudaMemcpyDeviceToHost));
 
     gpuErrorcheck(cudaFree(d_dist));
