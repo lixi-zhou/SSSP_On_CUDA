@@ -8,15 +8,15 @@ Implement Single-Source Shortest Paths (SSSP) on both CPU and GPU (CUDA)
 
 <!-- TOC -->
 
-- [SSSP_On_CUDA](#sssponcuda)
-  - [Instruction](#instruction)
-  - [Description](#description)
-      - [Implementation of Dijkstra on CPU](#implementation-of-dijkstra-on-cpu)
-    - [Implementation of Dijkstra on GPU (sssp2)](#implementation-of-dijkstra-on-gpu-sssp2)
-    - [Implementation of Dijkstra on GPU (sssp6)](#implementation-of-dijkstra-on-gpu-sssp6)
-    - [Implementation of Dijkstra on GPU (sssp7)](#implementation-of-dijkstra-on-gpu-sssp7)
-    - [Implementation of Dijkstra on GPU (sssp8)](#implementation-of-dijkstra-on-gpu-sssp8)
-    - [Known issues](#known-issues)
+- [SSSP_On_CUDA](#sssp_on_cuda)
+    - [Instruction](#instruction)
+    - [Description](#description)
+            - [Implementation on CPU](#implementation-on-cpu)
+        - [Implementation of GPU](#implementation-of-gpu)
+    - [Running Application](#running-application)
+            - [Application Argument](#application-argument)
+    - [Input Graph Format](#input-graph-format)
+        - [Known issues](#known-issues)
 
 <!-- /TOC -->
 
