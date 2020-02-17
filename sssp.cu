@@ -209,13 +209,6 @@ uint* sssp_GPU(Graph *graph, int source) {
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
     printf("The execution time of SSSP on GPU: %f ms\n", timer.elapsedTime());
-    // cout << "Elapsed time in milliseconds : " 
-	// 	<< chrono::duration_cast<chrono::milliseconds>(end - start).count()
-	// 	<< " ms" << endl;
-
-    // cout << "Elapsed time in microseconds : " 
-	// 	<< chrono::duration_cast<chrono::microseconds>(end - start).count()
-    //     << " µs" << endl;
         
     gpuErrorcheck(cudaMemcpy(dist, d_dist, numNodes * sizeof(uint), cudaMemcpyDeviceToHost));
 
@@ -236,10 +229,21 @@ int main(int argc, char **argv){
     //  Graph graph("datasets/simpleGraph.txt");
 
     graph.readGraph();
+    
+    int sourceNode;
 
-    // uint *dist_cpu = sssp_CPU(&graph, graph.defaultSource);
+    if (args.hasSourceNode) {
+        sourceNode = args.sourceNode;
+    } else {
+        // Use graph default source 
+        sourceNode = graph.defaultSource;
+    }
 
-    uint *dist_gpu = sssp_GPU(&graph, graph.defaultSource);
+    uint *dist_gpu = sssp_GPU(&graph, sourceNode);
 
-    // compareResult(dist_cpu, dist_gpu, graph.numNodes);
+    if (args.runOnCPU) {
+        uint *dist_cpu = sssp_CPU(&graph, sourceNode);
+        compareResult(dist_cpu, dist_gpu, graph.numNodes);
+    }
+     
 }

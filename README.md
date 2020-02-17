@@ -2,7 +2,7 @@
 
 ---
 
-Implement Dijkstra's SSSP on both CPU and GPU (CUDA)
+Implement Single-Source Shortest Paths (SSSP) on both CPU and GPU (CUDA)
 
 ---
 
@@ -22,55 +22,49 @@ Implement Dijkstra's SSSP on both CPU and GPU (CUDA)
 
 ## Instruction
 
-Run `make [OPTION]` in the root folder to generate the executable file. There are mainly **4** different implementations of the SSSP.
+Run `make` in the root folder to generate the executable file.
 
-*The option can be sssp2, sssp6, sssp7, sssp8*
-
-There is some limitation now:
-
-1. Argument parsing is not supported yet. The path of graph data has to be hard code in the source file.
-2. For now, it only supports the graph, whose number of nodes is no bigger than 12,000.
+The core algorithm of this project is **Bellman-Ford Algorithm**.
 
 ## Description
 
-#### Implementation of Dijkstra on CPU
+#### Implementation on CPU
 
-- Set *finished*: the nodes have been processed.
-- Set *unprocessed*: the nodes have not been processed. `All nodes are placed in the unprocessed set after initialization.`
+1. Loop all edges to update vertexs' distance to source node.
+2. Repeate *Step 1* until there is no vertex needs to update its distance to source.
 
-1. Use for loop to find the closest node to the source node from **unprocessed** set.
-2. Use for loop to update the connected nodes' distance of the closest node.
-3. Repeat *Step 1* and *Step 2* until all nodes are in **finished** set.
+### Implementation of GPU
 
-### Implementation of Dijkstra on GPU (sssp2)
-
+1. Divide all edges into multiple parts.
+2. Launch multiple threads to process the edges assigned from *Step 1*.
+3. Repeate *Step 1* and *Step 2* until there is no vertex needs to update its distance to source.
 Basic implementation of dijkstra algorithm on GPU.
 
-1. Launch multiple threads to find the closest node parallel from **unprocessed** set.
-2. Launch multiple threads to update the connected nodes' distance of the closest node.
-3. Repeat  *Step 1* and *Step 2* until all nodes are in **finished** set. 
+## Running Application
 
-### Implementation of Dijkstra on GPU (sssp6)
+```shell
+$./sssp --input path_of_graph
+```
 
-1. Launch multiple thread the find the minimum distance of **unprocessed** nodes.
-2. Launch multiple thread to update the connected node's distance of the nodes, whose distance to source node equals to the minimum distance of *Step 1*.
-3. Repeat  *Step 1* and *Step 2* until all nodes are in **finished** set. 
+#### Application Argument
 
-### Implementation of Dijkstra on GPU (sssp7)
+```
+Optional arguments:
+  [--oncpu]: Run this graph on CPU. Its value must be true/false (default: false). E.g., --oncpu true
+  [--source]: Set the source node (default: minimum node number). E.g., --source 0  
+```
 
-1. Use CPU to find the minimum distance of **unprocessed** nodes.
-2. Launch multiple thread to update the connected node's distance of the nodes, whose distance to source node equals to the minimum distance of *Step 1*.
-3. Repeat  *Step 1* and *Step 2* until all nodes are in **finished** set. 
+## Input Graph Format
 
-### Implementation of Dijkstra on GPU (sssp8)
+Input graphs should be in form of plain text files. The format of each edge is as following:
 
-Allocate the memory by using the unified memory. The other part is the same as the sssp6.
+```
+source end weight
+```
+
+if the weight is not specified, it will be assigned to a default value: **1**.
 
 
 ---
 
 ### Known issues
-- [x] error when copying graph data from host to device
-- [x] SSSP on GPU/CPU implemented, but performance of GPU's is worse than CPU'S
-- [ ] SSSP version1 may have an accuracy problem when processing big graph
-- [ ] In some graph, its maximum node id is not its number of nodes

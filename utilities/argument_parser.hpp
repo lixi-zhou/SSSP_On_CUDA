@@ -10,6 +10,9 @@ class ArgumentParser {
 
     public:
         string inputFilePath;
+        bool runOnCPU;
+        int sourceNode;
+        bool hasSourceNode;
 
 
     ArgumentParser(int argc, char **argv);
