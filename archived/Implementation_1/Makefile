@@ -11,7 +11,7 @@ all: sssp7
 # 	$(NV) -o a.exe sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 sssp2: sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o dija sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 # sssp3: sssp3.cu newGraph.cpp timer.cpp
 # 	$(NV) -o a.exe sssp3.cu newGraph.cpp timer.cpp
@@ -20,13 +20,13 @@ sssp2: sssp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 # 	$(NV) -o a.exe sssp4.cu newGraph.cpp timer.cpp
 
 sssp6: sssp6.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o dija sssp6.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp6.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 sssp7: sssp7.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o dija sssp7.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp7.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 
 sssp8: sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o dija sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o sssp sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	
 clean:
 	rm *.obj

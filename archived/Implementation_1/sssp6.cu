@@ -130,8 +130,9 @@ void dijkstraOnCPU(int source) {
             }
         }
     }
+    timer.stop();
     printf("Number of Iteration Executed: %d\n", numIteration);
-    printf("The execution time of SSSP on CPU: %d ms\n", timer.stop());
+    printf("The execution time of SSSP on CPU: %f ms\n", timer.elapsedTime());
 }
 
 __global__ void dijkstraOnGPU_kernel1(int numNodes, 
@@ -293,9 +294,10 @@ void dijkstraOnGPU(int source){
         gpuErrorcheck(cudaPeekAtLastError());
         gpuErrorcheck(cudaDeviceSynchronize());  
     }while(!completed);
+    timer.stop();
 
     printf("Number of Iteration Executed: %d\n", numIteration);
-    printf("The execution time of SSSP on GPU: %d ms\n", timer.stop());
+    printf("The execution time of SSSP on GPU: %f ms\n", timer.elapsedTime());
     gpuErrorcheck(cudaMemcpy(&closestNodeId, d_closestNodeId, sizeof(int), cudaMemcpyDeviceToHost));
     gpuErrorcheck(cudaMemcpy(dist, d_dist, numNodes * sizeof(int), cudaMemcpyDeviceToHost));
 
@@ -310,15 +312,15 @@ void dijkstraOnGPU(int source){
 
 int main() {
 
-    // Graph graph1("datasets/simpleGragh.txt");
+    Graph graph1("datasets/simpleGraph.txt");
     // Graph graph1("datasets/email-Eu-core-SIMPLE.txt");
     // Graph graph1("datasets/email-Eu-core.txt");
-    Graph graph1("datasets/Wiki-Vote.txt");
+    // Graph graph1("datasets/Wiki-Vote.txt");
     // Graph graph1("datasets/simpleGragh2.txt");
     // Graph graph1("datasets/CA-GrQc.txt");
      //Graph graph("datasets/testGraph.txt");
     graph1.readGraph();
-    int sourceId = 30;
+    int sourceId = 0;
 
     init(&graph1, sourceId);   // source 0
         
