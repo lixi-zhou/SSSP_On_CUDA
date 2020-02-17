@@ -14,11 +14,13 @@
     <CudaCompile Include="sssp.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="utilities\argument_parser.cpp" />
     <ClCompile Include="utilities\global.cpp" />
     <ClCompile Include="utilities\graph.cpp" />
     <ClCompile Include="utilities\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="utilities\argument_parser.hpp" />
     <ClInclude Include="utilities\global.hpp" />
     <ClInclude Include="utilities\gpu_error_check.cuh" />
     <ClInclude Include="utilities\graph.hpp" />
