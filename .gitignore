@@ -9,3 +9,5 @@ dija.*
 .vscode/
 .vs/
 x64/
+*.exe
+*.exp
