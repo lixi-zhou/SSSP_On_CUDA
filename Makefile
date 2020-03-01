@@ -6,7 +6,7 @@ OPENMPFLAGS=-Xcompiler -openmp
 
 UTILITIES=utilities
 
-all: sssp
+all: sssp open
 
 sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS)

@@ -121,7 +121,6 @@ uint* sssp_GPU(Graph *graph, int source) {
     int numEdges = graph->numEdges;
     uint *dist = new uint[numNodes];
     uint *preNode = new uint[numNodes];
-    bool *processed = new bool[numNodes];
     uint *edgesSource = new uint[numEdges];
     uint *edgesEnd = new uint[numEdges];
     uint *edgesWeight = new uint[numEdges];
@@ -129,7 +128,6 @@ uint* sssp_GPU(Graph *graph, int source) {
     for (int i = 0; i < numNodes; i++) {
         dist[i] = MAX_DIST;
         preNode[i] = uint(-1);
-        processed[i] = false;
     }
 
 

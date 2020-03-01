@@ -11,9 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="sssp.cu" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="utilities\argument_parser.cpp" />
     <ClCompile Include="utilities\global.cpp" />
     <ClCompile Include="utilities\graph.cpp" />
@@ -25,6 +22,9 @@
     <ClInclude Include="utilities\gpu_error_check.cuh" />
     <ClInclude Include="utilities\graph.hpp" />
     <ClInclude Include="utilities\timer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="openmp.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B275A065-01C3-4018-B9D9-B169D896E66A}</ProjectGuid>
@@ -63,6 +63,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
