@@ -107,7 +107,8 @@ __global__ void sssp_GPU_Kernel(int numEdges,
         uint weight = edgesWeight[nodeId];
         
         if (dist[source] + weight < dist[end]) {
-            dist[end] = dist[source] + weight;
+            atomicMin(&dist[end], dist[source] + weight);
+            // dist[end] = dist[source] + weight;
             preNode[end] = source;
             *finished = false;
         }

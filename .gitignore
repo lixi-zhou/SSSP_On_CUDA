@@ -11,3 +11,7 @@ dija.*
 x64/
 *.exe
 *.exp
+datasets/roadNet*
+datasets/higgs*
+openmp.lib
+sssp.lib
