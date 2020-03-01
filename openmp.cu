@@ -425,19 +425,29 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     int d_numBlock = (numEdges - splitIndex + 1) / (d_numThreadsPerBlock * d_numEdgesPerThread) + 1;
     Timer timer_cpu, timer_gpu;
 
+    // Default: enable cpu and gpu 
+    // Once splitRatio equals to 0 only enable gpu
+    // Once splitRatio equals to 1 only enable cpu
+    
+    
+    bool cpu_enable = true;
+    bool gpu_enable = true;
+
+
 
     timer.start();
     while (!finished) {
         numIteration++;
         finished = true;
         h_finished = true;
+        splitIndex = numEdges * splitRatio;
         
-        #pragma omp parallel num_threads(8)
+        #pragma omp parallel //num_threads(8)
         {   
             timer_gpu.start();
             int threadId = omp_get_thread_num();
             int h_numThreads = omp_get_num_threads();
-            if (threadId == h_numThreads - 1 && splitIndex < numEdges) {
+            if (threadId == h_numThreads - 1 && splitIndex < numEdges  && gpu_enable) {
                 // Last thread will be used to launch gpu kernel 
                 // if thread 0 is used to launch gpu kernel, the first block of 
                 // data whose index begining from 0 will not be processed.
@@ -455,10 +465,9 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 gpuErrorcheck(cudaPeekAtLastError());
                 gpuErrorcheck(cudaDeviceSynchronize()); 
                 gpuErrorcheck(cudaMemcpy(&finished, d_finished, sizeof(bool), cudaMemcpyDeviceToHost));
-                gpuErrorcheck(cudaMemcpy(dist_copy, d_dist, sizeof(uint) * numNodes, cudaMemcpyDeviceToHost)
-                );
+                gpuErrorcheck(cudaMemcpy(dist_copy, d_dist, sizeof(uint) * numNodes, cudaMemcpyDeviceToHost));
                 timer_gpu.stop();
-            } else {
+            } else if (cpu_enable) {
                 // printf("Sub threads\n");
                 timer_cpu.start();
                 int h_numEdgesPerThread = (splitIndex) / (h_numThreads - 1) + 1;
@@ -492,7 +501,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         finished = finished && h_finished;
         // printDist(dist, numNodes);
         // printDist(dist_copy, numNodes);
-        #pragma omp parallel num_threads(8)
+        #pragma omp parallel //num_threads(8)
         {
             int threadId = omp_get_thread_num();
             int h_numThreads = omp_get_num_threads();
@@ -515,41 +524,40 @@ uint* sssp_Hybrid(Graph *graph, int source) {
             }
         }
 
-
-
-        // if (!finished) {
-        //     // Need to merge
-        //     for (int i = 0; i < numNodes; i++) {
-        //         if (dist[i] > dist_copy[i]) {
-        //             // Merge
-        //             dist[i] = dist_copy[i];
-        //         }
-        //     }
-        // }
-        
-
         // Load Balancing
-        
-        float factor = (timer_cpu.elapsedTime() / timer_gpu.elapsedTime());
-        // splitRatio = splitRatio / factor;
-        if (factor > 1) {
-            splitRatio = splitRatio - 0.05;
-        } else {
-            splitRatio = splitRatio + 0.05;
-        }
-        
 
-        splitRatio = (splitRatio > 1) ? 1 : splitRatio;
-        splitRatio = (splitRatio < 0) ? 0 : splitRatio;
+        if (cpu_enable && gpu_enable) {
+            float factor = (timer_cpu.elapsedTime() / timer_gpu.elapsedTime());
+            // splitRatio = splitRatio / factor;
+            if (factor > 1) {
+                splitRatio = splitRatio - 0.05;
+                if (splitRatio < 0) {
+                    splitRatio = 0;
+                    cpu_enable = false;
+                }
+    
+            } else {
+                splitRatio = splitRatio + 0.05;
+                if (splitRatio > 1) {
+                    splitRatio = 1;
+                    gpu_enable = false;
+                }
+            }
+
+            // printf("No. itr: %d , updated splitRatio: %f, factor: %f\n", numIteration, splitRatio, factor);
+
+            // printf("CPU PART TIME: %f\n", timer_cpu.elapsedTime());
+            // printf("GPU PART TIME: %f\n", timer_gpu.elapsedTime());
+        }
+
+        // splitRatio = (splitRatio > 1) ? 1 : splitRatio;
+        // splitRatio = (splitRatio < 0) ? 0 : splitRatio;
 
         // if (splitRatio > 1) {
         //     splitRatio = 1;
         // }
 
-        // printf("No. itr: %d , updated splitRatio: %f, factor: %f\n", numIteration, splitRatio, factor);
-
-        // printf("CPU PART TIME: %f\n", timer_cpu.elapsedTime());
-        // printf("GPU PART TIME: %f\n", timer_gpu.elapsedTime());
+        
         
     };
     timer.stop();
