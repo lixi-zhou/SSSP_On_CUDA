@@ -452,7 +452,10 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 // if thread 0 is used to launch gpu kernel, the first block of 
                 // data whose index begining from 0 will not be processed.
                 gpuErrorcheck(cudaMemcpy(d_finished, &finished, sizeof(bool), cudaMemcpyHostToDevice));
+                Timer timer_host_to_device;
+                timer_host_to_device.start();
                 gpuErrorcheck(cudaMemcpy(d_dist, dist, sizeof(uint) * numNodes, cudaMemcpyHostToDevice));
+                timer_host_to_device.stop();
                 sssp_GPU_Hybrid_Kernel<<< d_numBlock, d_numThreadsPerBlock>>> (splitIndex,
                                                                         numEdges,
                                                                         d_numEdgesPerThread,
@@ -465,8 +468,13 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 gpuErrorcheck(cudaPeekAtLastError());
                 gpuErrorcheck(cudaDeviceSynchronize()); 
                 gpuErrorcheck(cudaMemcpy(&finished, d_finished, sizeof(bool), cudaMemcpyDeviceToHost));
+                Timer timer_device_to_host;
+                timer_device_to_host.start();
                 gpuErrorcheck(cudaMemcpy(dist_copy, d_dist, sizeof(uint) * numNodes, cudaMemcpyDeviceToHost));
+                timer_device_to_host.stop();
                 timer_gpu.stop();
+                // printf("Copy dist from host to device : %f ms \n", timer_host_to_device.elapsedTime());
+                // printf("Copy dist from device to host : %f ms \n", timer_device_to_host.elapsedTime());
             } else if (cpu_enable) {
                 // printf("Sub threads\n");
                 timer_cpu.start();
@@ -582,12 +590,18 @@ uint* sssp_Hybrid(Graph *graph, int source) {
 
 
 int main(int argc, char **argv) {
+    Timer timer_total, timer_load;
+    timer_total.start();
+    
     ArgumentParser args(argc, argv);
+    timer_load.start();
     Graph graph(args.inputFilePath);
     //Graph graph("datasets/simpleGraph.txt");
 
     graph.readGraph();
+    timer_load.stop();
     
+
     int sourceNode;
 
     if (args.hasSourceNode) {
@@ -608,6 +622,10 @@ int main(int argc, char **argv) {
         uint *dist_cpu = sssp_CPU(&graph, sourceNode);
         compareResult(dist_cpu, dist_hybrid, graph.numNodes);
     }
+
+    timer_total.stop();
+    printf("Total execution time: %f ms\n", timer_total.elapsedTime());
+    printf("Graph loading execution time: %f ms\n", timer_load.elapsedTime());
 
     return 0;
 }
