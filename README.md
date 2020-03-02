@@ -8,16 +8,16 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
 
 <!-- TOC -->
 
-- [SSSP_On_CUDA](#sssponcuda)
-  - [Instruction](#instruction)
-  - [Description](#description)
-      - [Implementation on CPU](#implementation-on-cpu)
-    - [Implementation of GPU](#implementation-of-gpu)
-    - [Implementation of Hybrid (CPU - GPU)](#implementation-of-hybrid-cpu---gpu)
-  - [Running Application](#running-application)
-      - [Application Argument](#application-argument)
-  - [Input Graph Format](#input-graph-format)
-    - [Known issues](#known-issues)
+- [SSSP_On_CUDA](#sssp_on_cuda)
+    - [Instruction](#instruction)
+    - [Description](#description)
+        - [Implementation on CPU](#implementation-on-cpu)
+        - [Implementation of GPU](#implementation-of-gpu)
+        - [Implementation of Hybrid (CPU - GPU)](#implementation-of-hybrid-cpu---gpu)
+    - [Running Application](#running-application)
+            - [Application Argument](#application-argument)
+    - [Input Graph Format](#input-graph-format)
+        - [Known issues](#known-issues)
 
 <!-- /TOC -->
 
@@ -31,7 +31,7 @@ The core algorithm of this project is **Bellman-Ford Algorithm**.
 
 ## Description
 
-#### Implementation on CPU
+### Implementation on CPU
 
 1. Loop all edges to update vertexs' distance to source node.
 2. Repeate *Step 1* until there is no vertex needs to update its distance to source.
@@ -50,8 +50,11 @@ Basic implementation of dijkstra algorithm on GPU.
 ## Running Application
 
 ```shell
-$./sssp --input path_of_graph
+$ ./sssp --input path_of_graph
+$ ./openmp --input path_of_graph 
 ```
+
+for `openmp` it will run hybird implementation and gpu-only's implementation. You also can specify argument `--oncpu true` to run a cpu-only parallel implementation (OpenMP).
 
 #### Application Argument
 

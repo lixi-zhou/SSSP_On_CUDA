@@ -6,22 +6,6 @@
 Graph::Graph(string graphFilePath) {
 	this->graphFilePath = graphFilePath;
 	this->hasZeroId = false;
-	/* this->graph[0] = new int[GRAPH_MAX_SIZE * GRAPH_MAX_SIZE];
-	for (int i = 1; i < GRAPH_MAX_SIZE; i++){
-		// Make its memoery contiguous
-		this->graph[i] = graph[i-1] + GRAPH_MAX_SIZE;
-	} */
-
-
-	/* for (int i = 0; i < GRAPH_MAX_SIZE; i++) {
-		// this->graph[i] = new int[GRAPH_MAX_SIZE]();
-		
-		// memset(this->graph[i], 1, sizeof(int) * GRAPH_MAX_SIZE);
-		for(int j = 0; j < GRAPH_MAX_SIZE; j++){
-			this->graph[i][j] = MAX_DIST;
-		}
-	} */
-	//this->graph = new int *[MAX_INT][MAX_INT];
 }
 
 void Graph::readGraph() {
@@ -42,6 +26,8 @@ void Graph::readGraph() {
 			continue;
 		}
 
+		// stringstream ss(line);
+		ss.clear();
 		ss << line;
 		edgeCounter++;
 		

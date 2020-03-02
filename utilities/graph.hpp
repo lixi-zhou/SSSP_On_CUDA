@@ -30,7 +30,6 @@ public:
     uint numEdges;
     uint defaultSource;
     bool hasZeroId;
-    // int** graph = new int* [GRAPH_MAX_SIZE];
     vector<Edge> edges;
     Graph(string graphFilePath);
     void readGraph();
