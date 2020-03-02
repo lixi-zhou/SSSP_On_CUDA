@@ -29,6 +29,7 @@ void Graph::readGraph() {
 	infile.open(graphFilePath);
 
 	string line;
+	stringstream ss;
 	uint edgeCounter = 0;
 	uint maxNodeNumber = 0;
 	uint minNodeNumber = MAX_DIST;
@@ -41,7 +42,7 @@ void Graph::readGraph() {
 			continue;
 		}
 
-		stringstream ss(line);
+		ss << line;
 		edgeCounter++;
 		
 
