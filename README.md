@@ -54,7 +54,8 @@ $ ./sssp --input path_of_graph
 $ ./openmp --input path_of_graph 
 ```
 
-for `openmp` it will run hybird implementation and gpu-only's implementation. You also can specify argument `--oncpu true` to run a cpu-only parallel implementation (OpenMP).
+for `openmp` it will run hybrid implementation and GPU-only's implementation. You also can specify argument *--oncpu true* to run a CPU-only parallel implementation (OpenMP).
+
 
 #### Application Argument
 
