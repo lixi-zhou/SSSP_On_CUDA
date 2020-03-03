@@ -406,7 +406,17 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     bool h_finished = false;
     
     
-    float splitRatio = 0.6; // cpu_data_size / whole_data_size
+    float splitRatio; // cpu_data_size / whole_data_size
+
+    Automatic select a prior value of spritRatio based on experience
+    if (numEdges < 300000) {
+        splitRatio = 0.95;
+    } else if (numEdges < 800000) {
+        splitRatio = 0.7;
+    } else {
+        splitRatio = 0.5;
+    }
+
     /*
     CPU process edges from 0 to splitIndex   
         number of edges: splitIndex
