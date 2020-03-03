@@ -6,7 +6,7 @@ OPENMPFLAGS=-Xcompiler -openmp
 
 UTILITIES=utilities
 
-all: sssp open
+all: sssp open benchmark
 
 sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS)
@@ -17,6 +17,8 @@ sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 open: openmp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
 	$(NV) -o openmp openmp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS) $(OPENMPFLAGS)
 
+benchmark: benchmark.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+	$(NV) -o benchmark benchmark.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS) $(OPENMPFLAGS)
 
 
 	
