@@ -8,16 +8,16 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
 
 <!-- TOC -->
 
-- [SSSP_On_CUDA](#sssp_on_cuda)
-    - [Instruction](#instruction)
-    - [Description](#description)
-        - [Implementation on CPU](#implementation-on-cpu)
-        - [Implementation of GPU](#implementation-of-gpu)
-        - [Implementation of Hybrid (CPU - GPU)](#implementation-of-hybrid-cpu---gpu)
-    - [Running Application](#running-application)
-            - [Application Argument](#application-argument)
-    - [Input Graph Format](#input-graph-format)
-        - [Known issues](#known-issues)
+- [SSSP_On_CUDA](#sssponcuda)
+  - [Instruction](#instruction)
+  - [Description](#description)
+    - [Implementation on CPU](#implementation-on-cpu)
+    - [Implementation of GPU](#implementation-of-gpu)
+    - [Implementation of Hybrid (CPU - GPU)](#implementation-of-hybrid-cpu---gpu)
+  - [Running Application](#running-application)
+      - [Application Argument](#application-argument)
+  - [Input Graph Format](#input-graph-format)
+    - [Known issues](#known-issues)
 
 <!-- /TOC -->
 
@@ -79,3 +79,5 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 ---
 
 ### Known issues
+
+- [ ] Improve the speed of loading graph

@@ -406,7 +406,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     bool h_finished = false;
     
     
-    float splitRatio = 0.1; // cpu_data_size / whole_data_size
+    float splitRatio = 0.6; // cpu_data_size / whole_data_size
     /*
     CPU process edges from 0 to splitIndex   
         number of edges: splitIndex
@@ -428,6 +428,10 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     
     bool cpu_enable = true;
     bool gpu_enable = true;
+
+    vector<LoopInfo> infos;
+    LoopInfo loopInfo;
+
 
     timer.start();
     do {
@@ -545,10 +549,16 @@ uint* sssp_Hybrid(Graph *graph, int source) {
             // printf("GPU PART TIME: %f\n", timer_gpu.elapsedTime());
             // printf("Copy dist from host to device : %f ms \n", timer_host_to_device.elapsedTime());
             // printf("Copy dist from device to host : %f ms \n", timer_device_to_host.elapsedTime());
+            loopInfo.numIteration = numIteration;
+            loopInfo.time_cpu = timer_cpu.elapsedTime();
+            loopInfo.time_gpu = timer_gpu.elapsedTime();
+            loopInfo.splitRatio = splitRatio;
+            infos.push_back(loopInfo);
         } 
     } while(!finished);
     timer.stop();
 
+    printLoopInfo(infos);
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
     printf("The execution time of SSSP on Hybrid(CPU-GPU): %f ms\n", timer.elapsedTime());
