@@ -77,7 +77,7 @@ uint* sssp_CPU(Graph* graph, int source){
 
 
 
-uint* sssp_CPU_parallel(Graph *graph, int source) {
+float sssp_CPU_parallel(Graph *graph, int source) {
     int numNodes = graph->numNodes;
     int numEdges = graph->numEdges;
     uint *dist = new uint[numNodes];
@@ -156,11 +156,12 @@ uint* sssp_CPU_parallel(Graph *graph, int source) {
     }
     timer.stop();
 
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on CPU(OpenMP): %f ms\n", timer.elapsedTime());
+    // printf("Process Done!\n");
+    // printf("Number of Iteration: %d\n", numIteration);
+    // printf("The execution time of SSSP on CPU(OpenMP): %f ms\n", timer.elapsedTime());
 
-    return dist;
+    // return dist;
+    return timer.elapsedTime();
 
 }
 
@@ -199,7 +200,7 @@ __global__ void sssp_GPU_Kernel(int numEdges,
 
 }
 
-uint* sssp_GPU(Graph *graph, int source) {
+float sssp_GPU(Graph *graph, int source) {
     int numNodes = graph->numNodes;
     int numEdges = graph->numEdges;
     uint *dist = new uint[numNodes];
@@ -288,9 +289,9 @@ uint* sssp_GPU(Graph *graph, int source) {
     timer.stop();
 
 
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on GPU: %f ms\n", timer.elapsedTime());
+    // printf("Process Done!\n");
+    // printf("Number of Iteration: %d\n", numIteration);
+    // printf("The execution time of SSSP on GPU: %f ms\n", timer.elapsedTime());
 
     gpuErrorcheck(cudaMemcpy(dist, d_dist, numNodes * sizeof(uint), cudaMemcpyDeviceToHost));
 
@@ -301,7 +302,8 @@ uint* sssp_GPU(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_edgesEnd));
     gpuErrorcheck(cudaFree(d_edgesWeight));
 
-    return dist;
+    // return dist;
+    return timer.elapsedTime();
 }
 
 
@@ -339,7 +341,7 @@ __global__ void sssp_GPU_Hybrid_Kernel(int splitIndex,
     }
 }
 
-uint* sssp_Hybrid(Graph *graph, int source) {
+float sssp_Hybrid(Graph *graph, int source) {
     int numNodes = graph->numNodes;
     int numEdges = graph->numEdges;
     uint *dist = new uint[numNodes];
@@ -568,10 +570,10 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     } while(!finished);
     timer.stop();
 
-    printLoopInfo(infos);
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on Hybrid(CPU-GPU): %f ms\n", timer.elapsedTime());
+    // printLoopInfo(infos);
+    // printf("Process Done!\n");
+    // printf("Number of Iteration: %d\n", numIteration);
+    // printf("The execution time of SSSP on Hybrid(CPU-GPU): %f ms\n", timer.elapsedTime());
 
     gpuErrorcheck(cudaFree(d_dist));
     gpuErrorcheck(cudaFree(d_preNode));
@@ -581,7 +583,8 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_edgesWeight));
 
 
-    return dist;
+    // return dist;
+    return timer.elapsedTime();
 }
 
 
@@ -609,8 +612,38 @@ int main(int argc, char **argv) {
     }
 
     // uint *dist_cpu_parallel = sssp_CPU_parallel(&graph, sourceNode);
+    
+    // Hybrid running time
+    float time_hybrid = 0;
+    for (int i = 0; i < 100; i++) {
+        time_hybrid += sssp_Hybrid(&graph, sourceNode);
+    }
+    time_hybrid = time_hybrid / 100;
 
-    uint *dist_hybrid = sssp_Hybrid(&graph, sourceNode);
+
+    // GPU-only running time
+    float time_gpu = 0;
+    for (int i = 0; i < 100; i++) {
+        time_gpu += sssp_GPU(&graph, sourceNode);
+    }
+    time_gpu = time_gpu / 100;
+
+    // CPU-OpenMP running time
+    float time_openmp = 0;
+
+    if (args.runOnCPU) {
+        for (int i = 0; i < 100; i++) {
+            time_openmp += sssp_CPU_parallel(&graph, sourceNode);
+        }
+        time_openmp = time_openmp / 100;
+        printf("CPU (OpenMP) running time: %f ms\n", time_openmp);
+    } 
+
+    
+    printf("GPU-Only running time: %f ms\n", time_gpu);
+    printf("Hybrid running time: %f ms\n", time_hybrid);
+
+    /* uint *dist_hybrid = sssp_Hybrid(&graph, sourceNode);
     uint *dist_gpu = sssp_GPU(&graph, sourceNode);
 
     compareResult(dist_hybrid, dist_gpu, graph.numNodes);
@@ -618,11 +651,11 @@ int main(int argc, char **argv) {
     if (args.runOnCPU) {
         uint *dist_cpu = sssp_CPU_parallel(&graph, sourceNode);
         compareResult(dist_cpu, dist_hybrid, graph.numNodes);
-    }
+    } */
 
     timer_total.stop();
-    printf("Total execution time: %f ms\n", timer_total.elapsedTime());
-    printf("Graph loading execution time: %f ms\n", timer_load.elapsedTime());
+    // printf("Total execution time: %f ms\n", timer_total.elapsedTime());
+    // printf("Graph loading execution time: %f ms\n", timer_load.elapsedTime());
 
     return 0;
 }

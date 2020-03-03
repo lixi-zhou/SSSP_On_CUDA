@@ -15,4 +15,4 @@ datasets/roadNet*
 datasets/higgs*
 openmp.lib
 sssp.lib
-benchmark.cu
+benchmark.lib
