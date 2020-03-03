@@ -615,27 +615,27 @@ int main(int argc, char **argv) {
     
     // Hybrid running time
     float time_hybrid = 0;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         time_hybrid += sssp_Hybrid(&graph, sourceNode);
     }
-    time_hybrid = time_hybrid / 100;
+    time_hybrid = time_hybrid / 10;
 
 
     // GPU-only running time
     float time_gpu = 0;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         time_gpu += sssp_GPU(&graph, sourceNode);
     }
-    time_gpu = time_gpu / 100;
+    time_gpu = time_gpu / 10;
 
     // CPU-OpenMP running time
     float time_openmp = 0;
 
     if (args.runOnCPU) {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             time_openmp += sssp_CPU_parallel(&graph, sourceNode);
         }
-        time_openmp = time_openmp / 100;
+        time_openmp = time_openmp / 10;
         printf("CPU (OpenMP) running time: %f ms\n", time_openmp);
     } 
 
