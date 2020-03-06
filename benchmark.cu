@@ -464,6 +464,7 @@ float sssp_Hybrid(Graph *graph, int source) {
         finished = true;
         h_finished = true;
         splitIndex = numEdges * splitRatio;
+        d_numBlock = (numEdges - splitIndex + 1) / (d_numThreadsPerBlock * d_numEdgesPerThread) + 1;
         
         #pragma omp parallel //num_threads(8)
         {   

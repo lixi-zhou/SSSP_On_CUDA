@@ -9,4 +9,4 @@ download:
 	$(WGET) http://snap.stanford.edu/data/soc-pokec-relationships.txt.gz
 
 unzip: 
-	$(UNZIP) *
+	$(UNZIP) *.gz

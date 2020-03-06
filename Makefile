@@ -6,7 +6,7 @@ OPENMPFLAGS=-Xcompiler -openmp
 
 UTILITIES=utilities
 
-all: sssp open benchmark datasets
+all: sssp open benchmark
 
 datasets:
 	make -C datasets
