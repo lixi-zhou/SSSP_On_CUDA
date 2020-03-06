@@ -69,6 +69,8 @@ void Graph::readGraph() {
 
 	}
 
+	infile.close();
+
 	
 	if (this->hasZeroId){
 		maxNodeNumber++;

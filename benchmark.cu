@@ -161,6 +161,13 @@ float sssp_CPU_parallel(Graph *graph, int source) {
     // printf("The execution time of SSSP on CPU(OpenMP): %f ms\n", timer.elapsedTime());
 
     // return dist;
+
+    delete []dist;
+    delete []preNode;
+    delete []edgesSource;
+    delete []edgesEnd;
+    delete []edgesWeight;
+
     return timer.elapsedTime();
 
 }
@@ -301,6 +308,12 @@ float sssp_GPU(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_edgesSource));
     gpuErrorcheck(cudaFree(d_edgesEnd));
     gpuErrorcheck(cudaFree(d_edgesWeight));
+
+    delete []dist;
+    delete []preNode;
+    delete []edgesSource;
+    delete []edgesEnd;
+    delete []edgesWeight;
 
     // return dist;
     return timer.elapsedTime();
@@ -581,6 +594,12 @@ float sssp_Hybrid(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_edgesSource));
     gpuErrorcheck(cudaFree(d_edgesEnd));
     gpuErrorcheck(cudaFree(d_edgesWeight));
+
+    delete []dist;
+    delete []preNode;
+    delete []edgesSource;
+    delete []edgesEnd;
+    delete []edgesWeight;
 
 
     // return dist;

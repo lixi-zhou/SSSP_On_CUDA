@@ -6,19 +6,19 @@ OPENMPFLAGS=-Xcompiler -openmp
 
 UTILITIES=utilities
 
-all: sssp open benchmark
+all: sssp open benchmark datasets
 
-sssp: sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS)
+datasets:
+	make -C datasets
 
-# sssp8: sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-# 	$(NV) -o dija sssp8.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
+sssp: sssp.cu 
+	$(NV) -o sssp sssp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS)
 
-open: openmp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o openmp openmp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS) $(OPENMPFLAGS)
+open: openmp.cu
+	$(NV) -o openmp openmp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 
-benchmark: benchmark.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp
-	$(NV) -o benchmark benchmark.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(NFLAGS) $(OPENMPFLAGS)
+benchmark: benchmark.cu 
+	$(NV) -o benchmark benchmark.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 
 
 	
