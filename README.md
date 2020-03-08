@@ -20,8 +20,8 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
   - [Performance](#performance)
     - [Datasets](#datasets)
     - [Running Time on graph datasets](#running-time-on-graph-datasets)
-    - [Known issues](#known-issues)
-    - [Optimization](#optimization)
+  - [Known issues](#known-issues)
+  - [Optimization](#optimization)
 
 <!-- /TOC -->
 
@@ -106,14 +106,14 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 
 ---
 
-### Known issues
+## Known issues
 
 - [x] Improve the speed of loading graph
 
 
 ---
 
-### Optimization
+## Optimization
 
 - [ ] bottleneck: data transferring between host and device
 - [ ] apporach the ideal split ratio faster
