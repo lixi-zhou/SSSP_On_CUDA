@@ -38,7 +38,7 @@ void printLoopInfo(vector<LoopInfo> info) {
 
     for (int i = 0; i < info.size(); i++) {
         LoopInfo loopInfo = info[i];
-        printf("No. itr: %d , updated splitRatio: %f\n", loopInfo.numIteration, loopInfo.splitRatio);
+        printf("No. itr: %d , updated CPU data size ratio: %f\n", loopInfo.numIteration, loopInfo.splitRatio);
         printf("CPU PART TIME: %f\n", loopInfo.time_cpu);
         printf("GPU PART TIME: %f\n", loopInfo.time_gpu);
         // printf("Copy dist from host to device : %f ms \n", timer_host_to_device.elapsedTime());

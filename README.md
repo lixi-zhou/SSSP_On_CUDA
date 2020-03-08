@@ -17,7 +17,11 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
   - [Running Application](#running-application)
       - [Application Argument](#application-argument)
   - [Input Graph Format](#input-graph-format)
+  - [Performance](#performance)
+    - [Datasets](#datasets)
+    - [Running Time on graph datasets](#running-time-on-graph-datasets)
     - [Known issues](#known-issues)
+    - [Optimization](#optimization)
 
 <!-- /TOC -->
 
@@ -76,8 +80,40 @@ source end weight
 if the weight is not specified, it will be assigned to a default value: **1**.
 
 
+## Performance 
+
+### Datasets 
+
+| Datasets  | Nodes | Edges | Diameter |
+| --                    | --:       | --:         | --: |
+| simpleGraph           | 9         | 11          | 4   | 
+| email-Eu-core         | 1,005     | 25,571      | 7   |
+| Wiki-Vote             | 8,298     | 103,689     | 7   |
+| CA-HepTh              | 9,877     | 25,998      | 17  |
+| p2p-Gnutella30        | 36,682    | 88,328      | 10  |
+| Slashdot0811          | 77,350    | 516,575     | 11  |
+| higgs_social_network  | 456,626   | 14,855,842  | 9   |
+| roadNet-PA            | 1,088,092 | 1,541,898   | 786 |
+
+### Running Time on graph datasets
+
+![running time](imgs/img2.png)
+
+
+**How load balancing works in hybrid**
+
+![load balancing](imgs/img1.png)
+
 ---
 
 ### Known issues
 
-- [ ] Improve the speed of loading graph
+- [x] Improve the speed of loading graph
+
+
+---
+
+### Optimization
+
+- [ ] bottleneck: data transferring between host and device
+- [ ] apporach the ideal split ratio faster

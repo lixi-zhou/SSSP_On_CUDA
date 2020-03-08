@@ -9,74 +9,6 @@
 #include <omp.h>
 
 
-uint* sssp_CPU(Graph* graph, int source){
-    int numNodes = graph->numNodes;
-    int numEdges = graph->numEdges;
-    uint *dist = new uint[numNodes];
-    uint *preNode = new uint[numNodes];
-    bool *processed = new bool[numNodes];
-
-    for (int i = 0; i < numNodes; i++) {
-        dist[i] = MAX_DIST;
-        preNode[i] = uint(-1);
-        processed[i] = false;
-    }
-
-
-    for (int i = 0; i < numEdges; i++) {
-        Edge edge = graph->edges.at(i);
-        if (edge.source == source){
-            if (edge.weight < dist[edge.end]){
-                dist[edge.end] = edge.weight;
-                preNode[edge.end] = source;
-            }
-        } else {
-            // Case: edge.source != source
-            continue;
-        }
-    }
-
-    Timer timer;
-    bool finished = false;
-    uint numIteration = 0;
-
-    dist[source] = 0;
-    preNode[source] = 0;
-    processed[source] = true;
-
-    timer.start();
-    while (!finished) {
-        // uint minDist = MAX_DIST;
-        finished = true;
-        numIteration++;
-
-        for (int i = 0; i < numEdges; i++){
-            Edge edge = graph->edges.at(i);
-            // Update its neighbor
-            uint source = edge.source;
-            uint end = edge.end;
-            uint weight = edge.weight;
-
-            if (dist[source] + weight < dist[end]) {
-                dist[end] = dist[source] + weight;
-                preNode[end] = source;
-                finished = false;
-            }
-        }
-        
-    }
-    timer.stop();
-    
-
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
-    printf("The execution time of SSSP on CPU: %f ms\n", timer.elapsedTime());
-
-    return dist;
-}
-
-
-
 uint* sssp_CPU_parallel(Graph *graph, int source) {
     int numNodes = graph->numNodes;
     int numEdges = graph->numEdges;
@@ -451,9 +383,10 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         splitIndex = numEdges * splitRatio;
         d_numBlock = (numEdges - splitIndex + 1) / (d_numThreadsPerBlock * d_numEdgesPerThread) + 1;
         
+        timer_gpu.start();
+        timer_cpu.start();
         #pragma omp parallel //num_threads(8)
         {   
-            timer_gpu.start();
             int threadId = omp_get_thread_num();
             int h_numThreads = omp_get_num_threads();
             if (threadId == h_numThreads - 1 && splitIndex < numEdges  && gpu_enable) {
@@ -482,7 +415,6 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 timer_gpu.stop();
             } else if (cpu_enable) {
                 // printf("Sub threads\n");
-                timer_cpu.start();
                 int h_numEdgesPerThread = (splitIndex) / (h_numThreads - 1) + 1;
                 int start = threadId * h_numEdgesPerThread;
                 int end = (threadId + 1) * h_numEdgesPerThread;
@@ -539,14 +471,14 @@ uint* sssp_Hybrid(Graph *graph, int source) {
 
         if (cpu_enable && gpu_enable) {
             float factor = (timer_cpu.elapsedTime() / timer_gpu.elapsedTime());
-            if (factor > 1) {
+            if (factor > 1.1) {
                 splitRatio = splitRatio - 0.05;
                 if (splitRatio < 0) {
                     splitRatio = 0;
                     cpu_enable = false;
                 }
     
-            } else {
+            } else if (factor < 0.9) {
                 splitRatio = splitRatio + 0.05;
                 if (splitRatio > 1) {
                     splitRatio = 1;
@@ -561,8 +493,8 @@ uint* sssp_Hybrid(Graph *graph, int source) {
             // printf("Copy dist from host to device : %f ms \n", timer_host_to_device.elapsedTime());
             // printf("Copy dist from device to host : %f ms \n", timer_device_to_host.elapsedTime());
             loopInfo.numIteration = numIteration;
-            loopInfo.time_cpu = timer_cpu.elapsedTime();
-            loopInfo.time_gpu = timer_gpu.elapsedTime();
+            loopInfo.time_cpu = timer_cpu.elapsedTime() > 0 ? timer_cpu.elapsedTime() : 0;
+            loopInfo.time_gpu = timer_gpu.elapsedTime() > 0 ? timer_gpu.elapsedTime() : 0;
             loopInfo.splitRatio = splitRatio;
             infos.push_back(loopInfo);
         } 
@@ -609,7 +541,6 @@ int main(int argc, char **argv) {
         sourceNode = graph.defaultSource;
     }
 
-    // uint *dist_cpu_parallel = sssp_CPU_parallel(&graph, sourceNode);
 
     uint *dist_hybrid = sssp_Hybrid(&graph, sourceNode);
     uint *dist_gpu = sssp_GPU(&graph, sourceNode);
