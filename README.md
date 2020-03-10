@@ -109,6 +109,7 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 ## Known issues
 
 - [x] Improve the speed of loading graph
+- [ ] Setting size of message -- Size is not correct
 
 
 ---

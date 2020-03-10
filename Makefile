@@ -22,6 +22,9 @@ benchmark: benchmark.cu
 
 temp: temp.cu 
 	$(NV) -o temp temp.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
+
+temp1: temp1.cu 
+	$(NV) -o temp1 temp1.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 	
 clean:
 	rm *.obj
