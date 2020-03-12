@@ -245,7 +245,10 @@ __global__ void sssp_Hybrid_GPU_Kernel(int splitIndex,
                                 uint *edgesSource,
                                 uint *edgesEnd,
                                 uint *edgesWeight,
-                                bool *finished) {
+                                bool *finished,
+                                uint *d_msgToHostIndex,
+                                uint *d_msgToHostNodeId,
+                                uint *d_msgToHostDist) {
     int threadId = blockDim.x * blockIdx.x + threadIdx.x;
     int startId = splitIndex + threadId * numEdgesPerThread;
     if (startId >= numEdges) {
@@ -267,6 +270,10 @@ __global__ void sssp_Hybrid_GPU_Kernel(int splitIndex,
             atomicMin(&dist[end], dist[source] + weight);
             preNode[end] = source;
             *finished = false;
+
+            int index = atomicAdd(d_msgToHostIndex, 1);
+            d_msgToHostNodeId[index] = end;
+            d_msgToHostDist[index] = dist[end];
         }
     }
 }
@@ -280,7 +287,10 @@ void sssp_Hybrid_CPU(int threadId,
                     uint *edgesSource,
                     uint *edgesEnd,
                     uint *edgesWeight,
-                    bool *finished) {
+                    bool *finished,
+                    uint *msgToDeviceIndex,
+                    uint *msgToDeviceNodeId,
+                    uint *msgToDeviceDist) {
     int start = threadId * numEdgesPerThread;
     int end = (threadId + 1) * numEdgesPerThread;
     if (start > splitIndex) return;
@@ -297,6 +307,18 @@ void sssp_Hybrid_CPU(int threadId,
             dist[end] = dist[source] + weight;
             preNode[end] = source;
             *finished = false;
+
+            uint index;
+            #pragma omp critical    
+            {
+                index = *msgToDeviceIndex;
+                msgToDeviceNodeId[index] = end;
+                msgToDeviceDist[index] = dist[end];
+                *msgToDeviceIndex = *msgToDeviceIndex + 1;
+            }
+            
+            
+            // printf("index:%d nodeId: %d dist: %d\n", index, end, dist[end]);
         }
     }
 }
@@ -319,6 +341,49 @@ void sssp_Hybrid_MergeDist(int threadId,
     }
 }
 
+void sssp_Hybrid_Host_Process_Message(int threadId,
+                                    int numMsg,
+                                    int numMsgPerThread,
+                                    uint *dist,
+                                    uint *msgToHostNodeId,
+                                    uint *msgToHostDist) {
+    int start = threadId * numMsgPerThread;
+    int end = (threadId + 1) * numMsgPerThread;
+    if (start > numMsg) return;
+    if (end > numMsg) {
+        end = numMsg;
+    }
+    for (int i = start; i < end; i++) {
+        int nodeId = msgToHostNodeId[i];
+        int updateDist = msgToHostDist[i];
+        if (dist[nodeId] > updateDist) {
+            dist[nodeId] = updateDist;
+        }
+    }
+}
+
+__global__ void sssp_Hybrid_GPU_Process_Message(int numMsgPerThread,
+                                            uint numMsg,
+                                            uint *dist,
+                                            uint *preNode,
+                                            uint *d_msgToDeviceNodeId,
+                                            uint *d_msgToDeviceDist) {
+    int threadId = blockDim.x * blockIdx.x + threadIdx.x;
+    int start = threadId * numMsgPerThread;
+    int end = (threadId + 1) * numMsgPerThread;
+    if (start > numMsg) return;
+    if (end > numMsg) {
+        end = numMsg;
+    }
+    for (int i = start; i < end; i++) {
+        int nodeId = d_msgToDeviceNodeId[i];
+        int updateDist = d_msgToDeviceDist[i];
+        if (dist[nodeId] > updateDist) {
+            atomicMin(&dist[nodeId], updateDist);
+        }  
+    }
+
+}
 
 uint* sssp_Hybrid(Graph *graph, int source) {
     int numNodes = graph->numNodes;
@@ -329,6 +394,14 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     uint *edgesEnd = new uint[numEdges];
     uint *edgesWeight = new uint[numEdges];
     uint *dist_copy = new uint[numNodes];
+
+    uint *msgToHostNodeId = new uint[numEdges];
+    uint *msgToHostDist = new uint[numEdges];
+    uint msgToHostIndex = 0;
+
+    uint *msgToDeviceNodeId = new uint[numEdges];
+    uint *msgToDeviceDist = new uint[numEdges];
+    uint msgToDeviceIndex = 0;
 
     for (int i = 0; i < numNodes; i++) {
         dist[i] = MAX_DIST;
@@ -364,6 +437,12 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     uint *d_edgesSource;
     uint *d_edgesEnd;
     uint *d_edgesWeight;
+    uint *d_msgToHostNodeId;
+    uint *d_msgToHostDist;
+    uint *d_msgToHostIndex;
+    uint *d_msgToDeviceNodeId;
+    uint *d_msgToDeviceDist;
+    uint *d_msgToDeviceIndex;
 
     gpuErrorcheck(cudaMalloc(&d_dist, numNodes * sizeof(uint)));
     gpuErrorcheck(cudaMalloc(&d_preNode, numNodes * sizeof(uint)));
@@ -372,11 +451,21 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     gpuErrorcheck(cudaMalloc(&d_edgesEnd, numEdges * sizeof(uint)));
     gpuErrorcheck(cudaMalloc(&d_edgesWeight, numEdges * sizeof(uint)));
 
+    gpuErrorcheck(cudaMalloc(&d_msgToHostNodeId, numEdges * sizeof(uint)));
+    gpuErrorcheck(cudaMalloc(&d_msgToHostDist, numEdges * sizeof(uint)));
+    gpuErrorcheck(cudaMalloc(&d_msgToHostIndex, sizeof(uint)));
+    gpuErrorcheck(cudaMalloc(&d_msgToDeviceNodeId, numEdges * sizeof(uint)));
+    gpuErrorcheck(cudaMalloc(&d_msgToDeviceDist, numEdges * sizeof(uint)));
+    gpuErrorcheck(cudaMalloc(&d_msgToDeviceIndex, sizeof(uint)));
+
     gpuErrorcheck(cudaMemcpy(d_dist, dist, numNodes * sizeof(uint), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_preNode, preNode, numNodes * sizeof(uint), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_edgesSource, edgesSource, numEdges * sizeof(uint), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_edgesEnd, edgesEnd, numEdges * sizeof(uint), cudaMemcpyHostToDevice));
     gpuErrorcheck(cudaMemcpy(d_edgesWeight, edgesWeight, numEdges * sizeof(uint), cudaMemcpyHostToDevice));
+
+    gpuErrorcheck(cudaMemcpy(d_msgToHostNodeId, msgToHostNodeId, numEdges * sizeof(uint), cudaMemcpyHostToDevice));
+    gpuErrorcheck(cudaMemcpy(d_msgToHostDist, msgToHostDist, numEdges * sizeof(uint), cudaMemcpyHostToDevice));
 
     // Copy from gpu memory
     memcpy(dist_copy, dist, numNodes * sizeof(uint));
@@ -422,7 +511,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
 
     vector<LoopInfo> infos;
     LoopInfo loopInfo;
-
+    splitRatio = 0.1;
 
     timer.start();
     do {
@@ -432,20 +521,25 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         splitIndex = numEdges * splitRatio;
         d_numBlock = (numEdges - splitIndex + 1) / (d_numThreadsPerBlock * d_numEdgesPerThread) + 1;
         
+        msgToDeviceIndex = 0;
+        msgToHostIndex = 0;
+
         timer_gpu.start();
         timer_cpu.start();
         #pragma omp parallel //num_threads(8)
         {   
             int threadId = omp_get_thread_num();
             int h_numThreads = omp_get_num_threads();
-            if (threadId == h_numThreads - 1 && splitIndex < numEdges  && gpu_enable) {
+            if (threadId == (h_numThreads - 1) && splitIndex < numEdges  && gpu_enable) {
                 // Last thread will be used to launch gpu kernel 
                 // if thread 0 is used to launch gpu kernel, the first block of 
                 // data whose index begining from 0 will not be processed.
                 gpuErrorcheck(cudaMemcpy(d_finished, &finished, sizeof(bool), cudaMemcpyHostToDevice));
                 // timer_host_to_device.start();
-                gpuErrorcheck(cudaMemcpy(d_dist, dist, sizeof(uint) * numNodes, cudaMemcpyHostToDevice));
+                // gpuErrorcheck(cudaMemcpy(d_dist, dist, sizeof(uint) * numNodes, cudaMemcpyHostToDevice));
                 // timer_host_to_device.stop();
+                gpuErrorcheck(cudaMemcpy(d_msgToHostIndex, &msgToHostIndex, sizeof(uint), cudaMemcpyHostToDevice));
+
                 sssp_Hybrid_GPU_Kernel<<< d_numBlock, d_numThreadsPerBlock>>> (splitIndex,
                                                                         numEdges,
                                                                         d_numEdgesPerThread,
@@ -454,13 +548,22 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                                                                         d_edgesSource,
                                                                         d_edgesEnd,
                                                                         d_edgesWeight,
-                                                                        d_finished);
+                                                                        d_finished,
+                                                                        d_msgToHostIndex,
+                                                                        d_msgToHostNodeId,
+                                                                        d_msgToHostDist);
                 gpuErrorcheck(cudaPeekAtLastError());
                 gpuErrorcheck(cudaDeviceSynchronize()); 
                 gpuErrorcheck(cudaMemcpy(&finished, d_finished, sizeof(bool), cudaMemcpyDeviceToHost));
                 // timer_device_to_host.start();
-                gpuErrorcheck(cudaMemcpy(dist_copy, d_dist, sizeof(uint) * numNodes, cudaMemcpyDeviceToHost));
+                // gpuErrorcheck(cudaMemcpy(dist_copy, d_dist, sizeof(uint) * numNodes, cudaMemcpyDeviceToHost));
                 // timer_device_to_host.stop();
+
+                gpuErrorcheck(cudaMemcpy(&msgToHostIndex, d_msgToHostIndex, sizeof(uint), cudaMemcpyDeviceToHost));
+                gpuErrorcheck(cudaMemcpy(msgToHostNodeId, d_msgToHostNodeId, sizeof(uint) * msgToHostIndex, cudaMemcpyDeviceToHost));
+                // printf("msgtohostindex: %d\n", msgToHostIndex);
+                gpuErrorcheck(cudaMemcpy(msgToHostDist, d_msgToHostDist, sizeof(uint) * msgToHostIndex, cudaMemcpyDeviceToHost));
+
                 timer_gpu.stop();
             } else if (cpu_enable) {
                 // printf("Sub threads\n");
@@ -475,15 +578,55 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                                 edgesSource,
                                 edgesEnd,
                                 edgesWeight,
-                                &finished);
-                
+                                &finished,
+                                &msgToDeviceIndex,
+                                msgToDeviceNodeId,
+                                msgToDeviceDist);
                 timer_cpu.stop();
             }
+            
         }
-        
+        // printf("msgToDeviceIndex: %d \n", msgToDeviceIndex);
        
         finished = finished && h_finished;
-        #pragma omp parallel //num_threads(8)
+
+
+        // Merge data
+        #pragma omp parallel
+        {
+            int threadId = omp_get_thread_num();
+            int h_numThreads = omp_get_num_threads();
+            if (threadId == (h_numThreads - 1)) {
+                int d_numMsg = msgToDeviceIndex;
+                int d_numMsgPerThread = 8;
+                d_numBlock = (d_numMsg) / (d_numThreadsPerBlock * d_numMsgPerThread) + 1;
+                gpuErrorcheck(cudaMemcpy(d_msgToDeviceNodeId, msgToDeviceNodeId, sizeof(uint) * d_numMsg, cudaMemcpyHostToDevice));
+                gpuErrorcheck(cudaMemcpy(d_msgToDeviceDist, msgToDeviceDist, sizeof(uint) * d_numMsg, cudaMemcpyHostToDevice));
+
+                sssp_Hybrid_GPU_Process_Message<<< d_numBlock, d_numThreadsPerBlock >>> (d_numMsgPerThread,
+                                                                                    d_numMsg,
+                                                                                    d_dist,
+                                                                                    d_preNode,
+                                                                                    d_msgToDeviceNodeId,
+                                                                                    d_msgToDeviceDist);
+                gpuErrorcheck(cudaPeekAtLastError());
+                gpuErrorcheck(cudaDeviceSynchronize());  
+            } else if (threadId != (h_numThreads - 1)) {
+                int h_numMsg = msgToHostIndex;
+                int h_numMsgPerThread = (h_numMsg) / (h_numThreads - 1) + 1;
+                sssp_Hybrid_Host_Process_Message(threadId,
+                                                h_numMsg,
+                                                h_numMsgPerThread,
+                                                dist,
+                                                msgToHostNodeId,
+                                                msgToHostDist);
+
+                // }
+            }
+        }
+
+
+        /* #pragma omp parallel //num_threads(8)
         {
             int threadId = omp_get_thread_num();
             int h_numThreads = omp_get_num_threads();
@@ -496,7 +639,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                                     dist,
                                     dist_copy);
             }
-        }
+        } */
 
         // Load Balancing
 
@@ -538,7 +681,12 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_edgesSource));
     gpuErrorcheck(cudaFree(d_edgesEnd));
     gpuErrorcheck(cudaFree(d_edgesWeight));
-
+    gpuErrorcheck(cudaFree(d_msgToHostNodeId));
+    gpuErrorcheck(cudaFree(d_msgToHostDist));
+    gpuErrorcheck(cudaFree(d_msgToHostIndex));
+    gpuErrorcheck(cudaFree(d_msgToDeviceNodeId));
+    gpuErrorcheck(cudaFree(d_msgToDeviceDist));
+    gpuErrorcheck(cudaFree(d_msgToDeviceIndex));
 
     return dist;
 }
