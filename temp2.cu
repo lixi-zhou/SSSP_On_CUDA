@@ -312,10 +312,10 @@ void sssp_Hybrid_CPU(int threadId,
             #pragma omp critical    
             {
                 index = *msgToDeviceIndex;
-                msgToDeviceNodeId[index] = end;
-                msgToDeviceDist[index] = dist[end];
                 *msgToDeviceIndex = *msgToDeviceIndex + 1;
             }
+            msgToDeviceNodeId[index] = end;
+            msgToDeviceDist[index] = dist[end];
             
             
             // printf("index:%d nodeId: %d dist: %d\n", index, end, dist[end]);
@@ -642,7 +642,6 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         } */
 
         // Load Balancing
-
         if (cpu_enable && gpu_enable) {
             float factor = (timer_cpu.elapsedTime() / timer_gpu.elapsedTime());
             if (factor > 1.1) {
