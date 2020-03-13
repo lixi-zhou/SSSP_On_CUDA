@@ -19,6 +19,8 @@ struct LoopInfo{
     uint numIteration;
     float time_cpu;
     float time_gpu;
+    float time_cpu_message;
+    float time_gpu_message;
     float splitRatio;
 };
 
@@ -33,5 +35,7 @@ void printPreNode(uint* preNode, uint size);
 void compareResult(uint* dist1, uint* dist2, uint numNodes);
 
 void printLoopInfo(vector<LoopInfo> info);
+
+void printLoopInfoV2(vector<LoopInfo> info);
 
 #endif

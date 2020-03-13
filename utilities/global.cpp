@@ -35,18 +35,23 @@ void compareResult(uint* dist1, uint* dist2, uint numNodes) {
 }
 
 void printLoopInfo(vector<LoopInfo> info) {
-
     for (int i = 0; i < info.size(); i++) {
         LoopInfo loopInfo = info[i];
         printf("No. itr: %d , updated CPU data size ratio: %f\n", loopInfo.numIteration, loopInfo.splitRatio);
         printf("CPU PART TIME: %f\n", loopInfo.time_cpu);
         printf("GPU PART TIME: %f\n", loopInfo.time_gpu);
         // printf("Copy dist from host to device : %f ms \n", timer_host_to_device.elapsedTime());
-        // printf("Copy dist from device to host : %f ms \n", timer_device_to_host.elapsedTime());
-            
+        // printf("Copy dist from device to host : %f ms \n", timer_device_to_host.elapsedTime()); 
     }
+}
 
-
-    
-
+void printLoopInfoV2(vector<LoopInfo> info) {
+    for (int i = 0; i < info.size(); i++) {
+        LoopInfo loopInfo = info[i];
+        printf("No. itr: %d , updated CPU data size ratio: %f\n", loopInfo.numIteration, loopInfo.splitRatio);
+        printf("CPU PART TIME: %f\n", loopInfo.time_cpu);
+        printf("GPU PART TIME: %f\n", loopInfo.time_gpu);
+        printf("CPU Process Msg TIME: %f\n", loopInfo.time_cpu_message);
+        printf("GPU Process Msg TIME: %f\n", loopInfo.time_gpu_message);
+    }
 }
