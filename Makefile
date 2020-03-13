@@ -28,6 +28,9 @@ temp1: temp1.cu
 
 temp2: temp2.cu 
 	$(NV) -o temp2 temp2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
+
+temp3: temp3.cu 
+	$(NV) -o temp3 temp3.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 	
 clean:
 	rm *.obj
