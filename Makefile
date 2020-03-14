@@ -31,6 +31,9 @@ temp2: temp2.cu
 
 temp3: temp3.cu 
 	$(NV) -o temp3 temp3.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
-	
+
+temp4: temp4.cu 
+	$(NV) -o temp4 temp4.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
+		
 clean:
 	rm *.obj
