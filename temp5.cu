@@ -279,6 +279,7 @@ __global__ void sssp_Hybrid_GPU_Kernel(int splitIndex,
 }
 
 void sssp_Hybrid_CPU(int threadId,
+                    int numThreads,
                     int splitIndex,
                     int numEdges,
                     int numEdgesPerThread,
@@ -293,6 +294,7 @@ void sssp_Hybrid_CPU(int threadId,
                     uint *msgToDeviceDist) {
     int start = threadId * numEdgesPerThread;
     int end = (threadId + 1) * numEdgesPerThread;
+    int threadMsgIndex = start;
     if (start > splitIndex) return;
     if (end > splitIndex) {
         end = splitIndex;
@@ -303,27 +305,33 @@ void sssp_Hybrid_CPU(int threadId,
         uint end = edgesEnd[i];
         uint weight = edgesWeight[i];
         
-        if (dist[source] + weight < dist[end]) {
+        if (dist[source] + weight < dist[end]) { 
+            
             dist[end] = dist[source] + weight;
             preNode[end] = source;
+
             *finished = false;
 
             uint index;
-            #pragma omp critical    
+            
+            #pragma omp critical
             {
                 index = *msgToDeviceIndex;
                 *msgToDeviceIndex = *msgToDeviceIndex + 1;
+            
+               
+                    /* #pragma omp atomic capture
+                    {
+                        index = *msgToDeviceIndex;
+                        *msgToDeviceIndex+=1;
+                    } */
+                    
+                    
+                    
+                    // printf("index:%d nodeId: %d dist: %d\n", index, end, dist[end]);
             }
-            /* #pragma omp atomic capture
-            {
-                index = *msgToDeviceIndex;
-                *msgToDeviceIndex+=1;
-            } */
             msgToDeviceNodeId[index] = end;
             msgToDeviceDist[index] = dist[end];
-            
-            
-            // printf("index:%d nodeId: %d dist: %d\n", index, end, dist[end]);
         }
     }
 }
@@ -361,8 +369,11 @@ void sssp_Hybrid_Host_Process_Message(int threadId,
     for (int i = start; i < end; i++) {
         int nodeId = msgToHostNodeId[i];
         int updateDist = msgToHostDist[i];
-        if (dist[nodeId] > updateDist) {
-            dist[nodeId] = updateDist;
+        #pragma omp critical    
+        {
+            if (dist[nodeId] > updateDist) {
+                dist[nodeId] = updateDist;
+            }
         }
     }
 }
@@ -491,7 +502,6 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     } else {
         splitRatio = 0.5;
     }
-
     /*
     CPU process edges from 0 to splitIndex   
         number of edges: splitIndex
@@ -525,7 +535,6 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         h_finished = true;
         splitIndex = numEdges * splitRatio;
         d_numBlock = (numEdges - splitIndex + 1) / (d_numThreadsPerBlock * d_numEdgesPerThread) + 1;
-        
         msgToDeviceIndex = 0;
         msgToHostIndex = 0;
 
@@ -575,6 +584,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 int h_numEdgesPerThread = (splitIndex) / (h_numThreads - 1) + 1;
                 
                 sssp_Hybrid_CPU(threadId, 
+                                h_numThreads,
                                 splitIndex,
                                 numEdges,
                                 h_numEdgesPerThread,
@@ -663,9 +673,9 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     } while(!finished);
     timer.stop();
 
-    printLoopInfoV2(infos);
-    printf("Process Done!\n");
-    printf("Number of Iteration: %d\n", numIteration);
+    // printLoopInfoV2(infos);
+    // printf("Process Done!\n");
+    // printf("Number of Iteration: %d\n", numIteration);
     printf("The execution time of SSSP on Hybrid(CPU-GPU): %f ms\n", timer.elapsedTime());
 
     gpuErrorcheck(cudaFree(d_dist));
@@ -680,6 +690,15 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     gpuErrorcheck(cudaFree(d_msgToDeviceNodeId));
     gpuErrorcheck(cudaFree(d_msgToDeviceDist));
     gpuErrorcheck(cudaFree(d_msgToDeviceIndex));
+
+    delete [] edgesSource;
+    delete [] edgesEnd;
+    delete [] edgesWeight;
+    delete [] msgToHostNodeId;
+    delete [] msgToHostDist;
+    delete [] msgToDeviceNodeId;
+    delete [] msgToDeviceDist;
+
 
     return dist;
 }
@@ -709,10 +728,12 @@ int main(int argc, char **argv) {
     }
 
 
-    uint *dist_hybrid = sssp_Hybrid(&graph, sourceNode);
+    uint *dist_hybrid;
     uint *dist_gpu = sssp_GPU(&graph, sourceNode);
-
-    compareResult(dist_hybrid, dist_gpu, graph.numNodes);
+    for (int i = 0; i < 100; i++) {
+        dist_hybrid = sssp_Hybrid(&graph, sourceNode);
+        compareResult(dist_hybrid, dist_gpu, graph.numNodes);
+    }
 
     if (args.runOnCPU) {
         uint *dist_cpu = sssp_CPU_parallel(&graph, sourceNode);

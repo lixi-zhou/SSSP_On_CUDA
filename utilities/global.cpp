@@ -21,16 +21,28 @@ void printPreNode(uint* preNode, uint size) {
 
 void compareResult(uint* dist1, uint* dist2, uint numNodes) {
     uint diffCount = 0;
+    vector<int> nodesId;
+    
     for (int i = 0; i < numNodes; i++) {
         if (dist1[i] != dist2[i]) {
             diffCount++;
+            nodesId.push_back(i);
+            // std::cout << "dist1:" << dist1[i] << " dist2:" << dist2[i] << endl;
+            // printf("index: %d dist1: %d, dist2: %d\n", i, dist1[i], dist2[i]);
         }
     }
+    
+    
 
     if (diffCount == 0) {
         std::cout << "Good! These two result are identical!" <<  std::endl;
     } else {
         std::cout << diffCount << " of " << numNodes << " does not match!" << std::endl;
+        std::cout << "\t\tNode: ";
+        for (int i = 0; i < nodesId.size(); i++) {
+            std::cout << nodesId[i] << ", ";
+        }
+        std::cout << " does not match" << endl;
     }
 }
 
