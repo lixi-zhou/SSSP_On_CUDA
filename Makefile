@@ -26,9 +26,6 @@ temp: temp.cu
 temp1: temp1.cu 
 	$(NV) -o temp1 temp1.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 
-openmpV2: openmpV2.cu 
-	$(NV) -o openmpV2 openmpV2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
-
 temp3: temp3.cu 
 	$(NV) -o temp3 temp3.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
 
@@ -37,6 +34,12 @@ temp4: temp4.cu
 
 temp5: temp5.cu 
 	$(NV) -o temp5 temp5.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
-		
+
+openmpV2: openmpV2.cu 
+	$(NV) -o openmpV2 openmpV2.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
+
+openmpV3: openmpV3.cu 
+	$(NV) -o openmpV3 openmpV3.cu $(UTILITIES)/graph.cpp $(UTILITIES)/timer.cpp $(UTILITIES)/global.cpp $(UTILITIES)/argument_parser.cpp $(CFLAGS) $(NFLAGS) $(OPENMPFLAGS)
+
 clean:
 	rm *.obj
