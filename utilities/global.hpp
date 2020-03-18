@@ -21,6 +21,7 @@ struct LoopInfo{
     float time_gpu;
     float time_cpu_message;
     float time_gpu_message;
+    float time_dist_merge;
     float splitRatio;
 };
 
@@ -35,6 +36,8 @@ void printPreNode(uint* preNode, uint size);
 void compareResult(uint* dist1, uint* dist2, uint numNodes);
 
 void printLoopInfo(vector<LoopInfo> info);
+
+void printLoopInfoV1(vector<LoopInfo> info);
 
 void printLoopInfoV2(vector<LoopInfo> info);
 

@@ -374,7 +374,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
     vector<LoopInfo> infos;
     LoopInfo loopInfo;
 
-
+    Timer timer_merge;
     timer.start();
     do {
         numIteration++;
@@ -444,6 +444,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
         
        
         finished = finished && h_finished;
+        timer_merge.start();
         #pragma omp parallel //num_threads(8)
         {
             int threadId = omp_get_thread_num();
@@ -466,7 +467,7 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                 }
             }
         }
-
+        timer_merge.stop();
         // Load Balancing
 
         if (cpu_enable && gpu_enable) {
@@ -495,13 +496,14 @@ uint* sssp_Hybrid(Graph *graph, int source) {
             loopInfo.numIteration = numIteration;
             loopInfo.time_cpu = timer_cpu.elapsedTime() > 0 ? timer_cpu.elapsedTime() : 0;
             loopInfo.time_gpu = timer_gpu.elapsedTime() > 0 ? timer_gpu.elapsedTime() : 0;
+            loopInfo.time_dist_merge = timer_merge.elapsedTime();
             loopInfo.splitRatio = splitRatio;
             infos.push_back(loopInfo);
         } 
     } while(!finished);
     timer.stop();
 
-    printLoopInfo(infos);
+    printLoopInfoV1(infos);
     printf("Process Done!\n");
     printf("Number of Iteration: %d\n", numIteration);
     printf("The execution time of SSSP on Hybrid(CPU-GPU): %f ms\n", timer.elapsedTime());

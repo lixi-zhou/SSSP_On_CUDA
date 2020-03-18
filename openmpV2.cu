@@ -727,7 +727,7 @@ int main(int argc, char **argv) {
 
     uint *dist_hybrid;
     uint *dist_gpu = sssp_GPU(&graph, sourceNode);
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1; i++) {
         dist_hybrid = sssp_Hybrid(&graph, sourceNode);
         compareResult(dist_hybrid, dist_gpu, graph.numNodes);
     }
