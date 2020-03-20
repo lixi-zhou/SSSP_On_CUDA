@@ -589,6 +589,16 @@ uint* sssp_Hybrid(Graph *graph, int source) {
                                 msgToDeviceDist);
                 timer_cpu.stop();
             }
+            /* #pragma omp barrier
+            // CPU merge data
+            int h_numMsg = msgToHostIndex;
+            int h_numMsgPerThread = (h_numMsg) / (h_numThreads) + 1;
+                sssp_Hybrid_Host_Process_Message(threadId,
+                                                h_numMsg,
+                                                h_numMsgPerThread,
+                                                dist,
+                                                msgToHostNodeId,
+                                                msgToHostDist); */
             
         }
         // printf("msgToDeviceIndex: %d \n", msgToDeviceIndex);

@@ -12,8 +12,9 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
   - [Instruction](#instruction)
   - [Description](#description)
     - [Implementation on CPU](#implementation-on-cpu)
-    - [Implementation of GPU](#implementation-of-gpu)
-    - [Implementation of Hybrid (CPU - GPU)](#implementation-of-hybrid-cpu---gpu)
+    - [Implementation on GPU](#implementation-on-gpu)
+    - [Implementation on Hybrid (CPU - GPU)](#implementation-on-hybrid-cpu---gpu)
+      - [Load Balancing of Hybird Implementation](#load-balancing-of-hybird-implementation)
   - [Running Application](#running-application)
       - [Application Argument](#application-argument)
   - [Input Graph Format](#input-graph-format)
@@ -21,7 +22,7 @@ Implement Single-Source Shortest Paths (SSSP) on CPU, GPU (CUDA), and Hybrid (CP
     - [Datasets](#datasets)
     - [Running Time on graph datasets](#running-time-on-graph-datasets)
   - [Known issues](#known-issues)
-  - [Optimization](#optimization)
+  - [To-Do](#to-do)
 
 <!-- /TOC -->
 
@@ -40,16 +41,32 @@ The core algorithm of this project is **Bellman-Ford Algorithm**.
 1. Loop all edges to update vertexs' distance to source node.
 2. Repeate *Step 1* until there is no vertex needs to update its distance to source.
 
-### Implementation of GPU
+### Implementation on GPU
 
 1. Divide all edges into multiple parts.
 2. Launch multiple threads to process the edges assigned from *Step 1*.
 3. Repeate *Step 1* and *Step 2* until there is no vertex needs to update its distance to source.
 Basic implementation of dijkstra algorithm on GPU.
+4. Use compiled file `sssp` to run the GPU's implementation.
 
-### Implementation of Hybrid (CPU - GPU)
+### Implementation on Hybrid (CPU - GPU)
 
-1. Use `openmp.exe (In Windows)` or `openmp (In Linux)` to run the hybrid one.
+1. The edges are split into two parts and assigned to CPU and GPU separately.
+2. CPU will use OpenMP to launch multiple threads to process the edges.
+3. Using CUDA to launch GPU threads to process edges.
+4. After each iteration, copy the **dist** array back to host then use OpenMP to launch threads to merge the dist of CPU's and GPU's.
+5. Use compiled file `openmp` to run the hybrid's implementation.
+
+#### Load Balancing of Hybird Implementation
+
+To better utilize the computing resource of CPU and GPU. The splitRatio $(\frac{size\;of\;CPU\;data}{size\;of\;whole\;data})$ is very important. I use a simple formula to dynamically change the splitRatio.
+
+- $t_{cpu}:$ time to process edges in CPU
+- $t_{gpu}:$ time to process edges in GPU
+
+$$factor=\frac{t_{cpu}}{t_{gpu}}$$
+
+$$splitRatio = \begin{cases}splitRatio + 0.05, & \text {if factor < 0.9} \\ splitRatio - 0.05, & \text {if factor > 1.1} \end{cases}$$
 
 ## Running Application
 
@@ -97,6 +114,12 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 
 ### Running Time on graph datasets
 
+**Experiment Platform**
+
+- CPU: i7-4720HQ (4 cores with 8 threads)
+- Memory: 16 GB DDR3 1600MHz
+- GPU: GTX965M with 2 GB Memory
+
 ![running time](imgs/img2.png)
 
 
@@ -109,12 +132,12 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 ## Known issues
 
 - [x] Improve the speed of loading graph
-- [ ] Setting size of message -- Size is not correct
+- [x] Setting size of message -- Size is not correct
 
 
 ---
 
-## Optimization
+## To-Do
 
 - [ ] bottleneck: data transferring between host and device
 - [ ] apporach the ideal split ratio faster

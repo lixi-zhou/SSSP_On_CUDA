@@ -24,7 +24,7 @@
     <ClInclude Include="utilities\timer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="temp.cu" />
+    <CudaCompile Include="temp3.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B275A065-01C3-4018-B9D9-B169D896E66A}</ProjectGuid>
