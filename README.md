@@ -59,14 +59,16 @@ Basic implementation of dijkstra algorithm on GPU.
 
 #### Load Balancing of Hybird Implementation
 
-To better utilize the computing resource of CPU and GPU. The splitRatio $(\frac{size\;of\;CPU\;data}{size\;of\;whole\;data})$ is very important. I use a simple formula to dynamically change the splitRatio.
+To better utilize the computing resource of CPU and GPU. The splitRatio ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20%28%5Cfrac%7Bsize%5C%3Bof%5C%3BCPU%5C%3Bdata%7D%7Bsize%5C%3Bof%5C%3Bwhole%5C%3Bdata%7D%29) is very important. I use a simple formula to dynamically change the splitRatio.
 
-- $t_{cpu}:$ time to process edges in CPU
-- $t_{gpu}:$ time to process edges in GPU
 
-$$factor=\frac{t_{cpu}}{t_{gpu}}$$
 
-$$splitRatio = \begin{cases}splitRatio + 0.05, & \text {if factor < 0.9} \\ splitRatio - 0.05, & \text {if factor > 1.1} \end{cases}$$
+- ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20t_%7Bcpu%7D%3A) time to process edges in CPU
+- ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20t_%7Bgpu%7D%3A)time to process edges in GPU
+
+![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20factor%3D%5Cfrac%7Bt_%7Bcpu%7D%7D%7Bt_%7Bgpu%7D%7D)
+
+![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20splitRatio%20%3D%20%5Cbegin%7Bcases%7DsplitRatio%20&plus;%200.05%2C%20%26%20%5Ctext%20%7Bif%20factor%20smaller%20than%200.9%7D%20%5C%5C%20splitRatio%20-%200.05%2C%20%26%20%5Ctext%20%7Bif%20factor%20larger%20than%201.1%7D%20%5Cend%7Bcases%7D)
 
 ## Running Application
 
@@ -141,3 +143,19 @@ if the weight is not specified, it will be assigned to a default value: **1**.
 
 - [ ] bottleneck: data transferring between host and device
 - [ ] apporach the ideal split ratio faster
+
+
+--- 
+
+LaTeX used in markdown
+
+
+$(\frac{size\;of\;CPU\;data}{size\;of\;whole\;data})$
+
+$t_{cpu}:$
+
+$t_{gpu}:$
+
+$$factor=\frac{t_{cpu}}{t_{gpu}}$$
+
+$$splitRatio = \begin{cases}splitRatio + 0.05, & \text {if factor < 0.9} \\ splitRatio - 0.05, & \text {if factor > 1.1} \end{cases}$$
